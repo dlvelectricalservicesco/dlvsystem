@@ -62,7 +62,7 @@
 
     <div id="loadingOverlay">
         <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500 mb-4"></div>
-        <p class="text-sm font-bold text-slate-600">Kumokonekta sa secure storage...</p>
+        <p class="text-sm font-bold text-slate-600">Kumokonekta sa DLV Database...</p>
         <div id="errorDisplay">Hindi makakonekta. Pakisuri ang iyong internet connection o Firebase configuration.</div>
         <button id="retryBtn" class="hidden mt-4 px-4 py-2 bg-slate-800 text-white text-xs rounded-lg font-bold">Subukan Muli</button>
     </div>
@@ -247,7 +247,7 @@
                                     <th class="px-2 py-3 text-center">Vale</th>
                                     <th class="px-2 py-3 text-center">C/A Vouch</th>
                                     <th class="px-2 py-3 text-center">Coop</th>
-                                    <th class="px-4 py-3 text-right bg-red-50 border-r">Total Ded.</th>
+                                    <th class="px-4 py-3 text-right bg-red-50 border-r">Total Ded..</th>
                                 </tr>
                             </thead>
                             <tbody id="payrollTableBody" class="divide-y divide-gray-100"></tbody>
@@ -339,29 +339,23 @@
         import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc, collection, query, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Firebase Configuration with Safety Checks
-        let firebaseConfig = null;
-        try {
-            if (typeof __firebase_config !== 'undefined' && __firebase_config) {
-                firebaseConfig = JSON.parse(__firebase_config);
-            }
-        } catch (e) {
-            console.error("Firebase config parse error", e);
-        }
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCHkN4FS6sGXIs8cleBwr5yIcjBn3Olt10",
+            authDomain: "dlvsys.firebaseapp.com",
+            projectId: "dlvsys",
+            storageBucket: "dlvsys.firebasestorage.app",
+            messagingSenderId: "332557308953",
+            appId: "1:332557308953:web:ffa160a0e41734c7690688",
+            measurementId: "G-7K33YZ93J8"
+        };
 
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'dlv-electrical-v1';
-        let app, auth, db;
-
+        
         // Initialize Firebase services
-        if (firebaseConfig) {
-            app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
-            db = getFirestore(app);
-        } else {
-            console.warn("No Firebase config found. App running in offline mode.");
-            document.getElementById('errorDisplay').innerText = "Configuration Missing: Please check your Firebase settings.";
-            document.getElementById('errorDisplay').style.display = 'block';
-        }
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
         // State
         let employees = [];
@@ -371,18 +365,26 @@
         let payrollHistory = [];
         let user = null;
 
-        // Authentication Logic with Retries (Rule 3)
+        /**
+         * RULE 3 - AUTH BEFORE QUERIES
+         * Inayos ang auth logic para malampasan ang Custom Token Mismatch error.
+         * Sinusubukan ang custom token, pero kung mag-fail (katulad ng error mo),
+         * gagamit ito ng signInAnonymously para gumana pa rin ang app.
+         */
         const initAuth = async (retries = 3) => {
-            if (!auth) return;
-            
             try {
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
+                    try {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } catch (tokenErr) {
+                        console.warn("Custom token mismatch detected, falling back to anonymous sign-in.");
+                        await signInAnonymously(auth);
+                    }
                 } else {
                     await signInAnonymously(auth);
                 }
             } catch (err) {
-                console.error("Auth error:", err);
+                console.error("Critical Auth error:", err);
                 if (retries > 0) {
                     setTimeout(() => initAuth(retries - 1), 2000);
                 } else {
@@ -392,18 +394,16 @@
             }
         };
 
-        if (auth) {
-            onAuthStateChanged(auth, (u) => {
-                user = u;
-                if (u) {
-                    document.getElementById('authStatus').innerText = `Connected: ${u.uid.slice(0, 8)}...`;
-                    document.getElementById('loadingOverlay').style.display = 'none';
-                    startListeners();
-                } else {
-                    document.getElementById('authStatus').innerText = "Connecting...";
-                }
-            });
-        }
+        onAuthStateChanged(auth, (u) => {
+            user = u;
+            if (u) {
+                document.getElementById('authStatus').innerText = `Connected: ${u.uid.slice(0, 8)}...`;
+                document.getElementById('loadingOverlay').style.display = 'none';
+                startListeners();
+            } else {
+                document.getElementById('authStatus').innerText = "Connecting...";
+            }
+        });
 
         document.getElementById('retryBtn').onclick = () => {
             document.getElementById('errorDisplay').style.display = 'none';
@@ -413,7 +413,7 @@
 
         // RULE 1: Strict Paths - Firestore Listeners
         const startListeners = () => {
-            if (!user || !db) return;
+            if (!user) return;
 
             // Employees
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'employees'), 
@@ -464,8 +464,7 @@
             );
         };
 
-        // --- UI Logic (Same as previous version but integrated) ---
-
+        // --- UI Logic ---
         window.showSection = (section) => {
             const sections = ['dashboardSection', 'employeeSection', 'sitesSection', 'attendanceSection', 'payrollSection', 'historySection', 'deductionSection'];
             sections.forEach(s => document.getElementById(s).classList.add('hidden'));
@@ -524,7 +523,7 @@
 
         document.getElementById('addEmployeeForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (!user || !db) return;
+            if (!user) return;
             const id = Date.now().toString();
             const newEmp = {
                 name: document.getElementById('newName').value,
@@ -543,7 +542,7 @@
         });
 
         window.deleteEmployee = async (id) => {
-            if(!user || !db) return;
+            if(!user) return;
             if(confirm("Burahin ang empleyadong ito?")) {
                 await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'employees', id));
                 await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'deductions', id));
@@ -596,7 +595,7 @@
         };
 
         window.updateAtt = async (empId, dKey, field, val) => {
-            if(!user || !db) return;
+            if(!user) return;
             const key = `${empId}-${dKey}`;
             const existing = attendanceData[key] || { status:null, ot:0, nd:0, holidayType:'none', site:'' };
             let updated = { ...existing };
@@ -629,7 +628,7 @@
         };
 
         window.updateMasterDeduction = async (empId, field, val) => {
-            if(!user || !db) return;
+            if(!user) return;
             const existing = deductionData[empId] || { sss:0, philhealth:0, pagibig:0, loan:0, unpaid:0, vale:0, voucher:0, coop:0 };
             const updated = { ...existing, [field]: parseFloat(val) || 0 };
             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'deductions', empId), updated);
@@ -697,7 +696,7 @@
         };
 
         window.finalizePayroll = async () => {
-            if(!user || !db) return;
+            if(!user) return;
             const dates = getCycleDates();
             const period = `${dates[0].toLocaleDateString()} - ${dates[6].toLocaleDateString()}`;
             if(!confirm(`I-finalize ang report?`)) return;
