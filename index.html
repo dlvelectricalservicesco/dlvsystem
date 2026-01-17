@@ -31,15 +31,33 @@
             .bg-slate-900 { background-color: white !important; color: black !important; }
             .shadow-sm, .shadow-lg { shadow: none !important; border: 1px solid #eee; }
         }
+
+        #loadingOverlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
+
+    <div id="loadingOverlay">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500 mb-4"></div>
+        <p class="text-sm font-bold text-slate-600">Connecting to secure storage...</p>
+    </div>
 
     <!-- Sidebar -->
     <div class="fixed inset-y-0 left-0 w-64 bg-slate-900 text-white transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out z-50 no-print" id="sidebar">
         <div class="p-6">
             <h1 class="text-xl font-bold tracking-wider text-yellow-400">DLV ELECTRICAL</h1>
             <p class="text-xs text-gray-400">Services Co. Management</p>
+            <div id="authStatus" class="mt-2 text-[10px] text-gray-500 uppercase font-bold">Connecting...</div>
         </div>
         
         <nav class="mt-6">
@@ -55,7 +73,7 @@
             <a href="#" onclick="showSection('attendance')" class="flex items-center px-6 py-3 text-gray-300 hover:bg-slate-800 hover:text-white transition-colors border-l-4 border-transparent hover:border-yellow-400">
                 <i class="fas fa-calendar-check w-6"></i><span class="ml-3">Attendance Tracker</span>
             </a>
-            <a href="#" onclick="showSection('deduction')" class="flex items-center px-6 py-3 text-gray-300 hover:bg-slate-800 hover:text-white transition-colors border-l-4 border-transparent hover:border-yellow-400 bg-slate-800/50">
+            <a href="#" onclick="showSection('deduction')" class="flex items-center px-6 py-3 text-gray-300 hover:bg-slate-800 hover:text-white transition-colors border-l-4 border-transparent hover:border-yellow-400">
                 <i class="fas fa-minus-circle w-6 text-red-400"></i><span class="ml-3">Deduction Settings</span>
             </a>
             <a href="#" onclick="showSection('payroll')" class="flex items-center px-6 py-3 text-gray-300 hover:bg-slate-800 hover:text-white transition-colors border-l-4 border-transparent hover:border-yellow-400">
@@ -300,22 +318,99 @@
         </div>
     </div>
 
-    <script>
-        let employees = JSON.parse(localStorage.getItem('dlv_employees')) || [];
-        let sites = JSON.parse(localStorage.getItem('dlv_sites')) || ["Office"];
-        let attendanceData = JSON.parse(localStorage.getItem('dlv_attendance')) || {};
-        let payrollHistory = JSON.parse(localStorage.getItem('dlv_history')) || [];
-        let deductionData = JSON.parse(localStorage.getItem('dlv_deductions')) || {};
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc, collection, query, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        function saveData() {
-            localStorage.setItem('dlv_employees', JSON.stringify(employees));
-            localStorage.setItem('dlv_sites', JSON.stringify(sites));
-            localStorage.setItem('dlv_attendance', JSON.stringify(attendanceData));
-            localStorage.setItem('dlv_history', JSON.stringify(payrollHistory));
-            localStorage.setItem('dlv_deductions', JSON.stringify(deductionData));
-        }
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyCHkN4FS6sGXIs8cleBwr5yIcjBn3Olt10",
+            authDomain: "dlvsys.firebaseapp.com",
+            projectId: "dlvsys",
+            storageBucket: "dlvsys.firebasestorage.app",
+            messagingSenderId: "332557308953",
+            appId: "1:332557308953:web:ffa160a0e41734c7690688",
+            measurementId: "G-7K33YZ93J8"
+        };
 
-        function showSection(section) {
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'dlv-electrical-v1';
+
+        // State
+        let employees = [];
+        let sites = ["Office"];
+        let attendanceData = {};
+        let deductionData = {};
+        let payrollHistory = [];
+        let currentUser = null;
+
+        // Initialize App
+        const init = async () => {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (err) {
+                console.error("Auth error:", err);
+            }
+        };
+
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            if (user) {
+                document.getElementById('authStatus').innerText = `Connected: ${user.uid.slice(0,8)}...`;
+                document.getElementById('loadingOverlay').style.display = 'none';
+                setupListeners(user.uid);
+            } else {
+                document.getElementById('authStatus').innerText = "Disconnected";
+            }
+        });
+
+        const setupListeners = (userId) => {
+            const publicPath = (coll) => collection(db, 'artifacts', appId, 'public', 'data', coll);
+            
+            // Listen to Employees
+            onSnapshot(publicPath('employees'), (snapshot) => {
+                employees = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                updateDashboard();
+                if (document.getElementById('employeeSection').classList.contains('block')) renderEmployeeList();
+            }, (err) => console.error("Employee listener error:", err));
+
+            // Listen to Sites
+            onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'metadata', 'sites'), (snapshot) => {
+                if (snapshot.exists()) sites = snapshot.data().list || ["Office"];
+                if (document.getElementById('sitesSection').classList.contains('block')) renderSites();
+            }, (err) => console.error("Sites listener error:", err));
+
+            // Listen to Attendance
+            onSnapshot(publicPath('attendance'), (snapshot) => {
+                attendanceData = {};
+                snapshot.docs.forEach(doc => { attendanceData[doc.id] = doc.data(); });
+                if (document.getElementById('attendanceSection').classList.contains('block')) initAttendanceTracker();
+            }, (err) => console.error("Attendance listener error:", err));
+
+            // Listen to Deductions
+            onSnapshot(publicPath('deductions'), (snapshot) => {
+                deductionData = {};
+                snapshot.docs.forEach(doc => { deductionData[doc.id] = doc.data(); });
+                if (document.getElementById('deductionSection').classList.contains('block')) renderDeductionSettings();
+            }, (err) => console.error("Deduction listener error:", err));
+
+            // Listen to History
+            onSnapshot(publicPath('history'), (snapshot) => {
+                payrollHistory = snapshot.docs.map(doc => doc.data()).sort((a,b) => new Date(b.dateFinalized) - new Date(a.dateFinalized));
+                if (document.getElementById('historySection').classList.contains('block')) renderHistory();
+            }, (err) => console.error("History listener error:", err));
+        };
+
+        // Exposed functions to window
+        window.showSection = (section) => {
             const sections = ['dashboardSection', 'employeeSection', 'sitesSection', 'attendanceSection', 'payrollSection', 'historySection', 'deductionSection'];
             sections.forEach(s => document.getElementById(s).classList.add('hidden'));
             document.getElementById(section + 'Section').classList.remove('hidden');
@@ -329,11 +424,12 @@
             if(section === 'deduction') renderDeductionSettings();
 
             document.getElementById('pageTitle').innerText = section.charAt(0).toUpperCase() + section.slice(1).replace('Section','');
-        }
+            if (window.innerWidth < 768) document.getElementById('sidebar').classList.add('-translate-x-full');
+        };
 
-        function toggleModal(type, show) {
+        window.toggleModal = (type, show) => {
             document.getElementById(type + 'Modal').classList.toggle('hidden', !show);
-        }
+        };
 
         function getCycleDates() {
             const now = new Date();
@@ -350,7 +446,7 @@
             return dates;
         }
 
-        function renderEmployeeList() {
+        window.renderEmployeeList = () => {
             const body = document.getElementById('employeeListBody');
             body.innerHTML = employees.map(emp => `
                 <tr class="hover:bg-gray-50">
@@ -364,36 +460,41 @@
                         <div class="text-[10px] text-slate-400">Allow: ₱${emp.allowance || 0}</div>
                     </td>
                     <td class="px-6 py-4 text-center">
-                        <button onclick="deleteEmployee(${emp.id})" class="text-red-400 hover:text-red-600"><i class="fas fa-trash"></i></button>
+                        <button onclick="deleteEmployee('${emp.id}')" class="text-red-400 hover:text-red-600"><i class="fas fa-trash"></i></button>
                     </td>
                 </tr>
             `).join('');
-        }
+        };
 
-        document.getElementById('addEmployeeForm').addEventListener('submit', (e) => {
+        document.getElementById('addEmployeeForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const id = Date.now();
-            employees.push({
-                id: id,
+            if (!currentUser) return;
+            const id = Date.now().toString();
+            const newEmp = {
                 name: document.getElementById('newName').value,
                 position: document.getElementById('newDesignation').value,
                 rate: parseFloat(document.getElementById('newRate').value),
                 allowance: parseFloat(document.getElementById('newAllowance').value || 0)
+            };
+            
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'employees', id), newEmp);
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'deductions', id), { 
+                sss:0, philhealth:0, pagibig:0, loan:0, unpaid:0, vale:0, voucher:0, coop:0 
             });
-            // Init default deduction for new employee
-            deductionData[id] = { sss:0, philhealth:0, pagibig:0, loan:0, unpaid:0, vale:0, voucher:0, coop:0 };
-            saveData(); renderEmployeeList(); toggleModal('employee', false); e.target.reset();
+            
+            toggleModal('employee', false); 
+            e.target.reset();
         });
 
-        function deleteEmployee(id) {
+        window.deleteEmployee = async (id) => {
+            if(!currentUser) return;
             if(confirm("Burahin ang empleyadong ito? Mabubura rin ang kanyang deduction data.")) {
-                employees = employees.filter(e => e.id !== id);
-                delete deductionData[id];
-                saveData(); renderEmployeeList();
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'employees', id));
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'deductions', id));
             }
-        }
+        };
 
-        function initAttendanceTracker() {
+        window.initAttendanceTracker = () => {
             const dates = getCycleDates();
             const periodLabel = `${dates[0].toLocaleDateString()} - ${dates[6].toLocaleDateString()}`;
             document.getElementById('currentAttendancePeriod').innerText = `Cycle: ${periodLabel}`;
@@ -414,18 +515,18 @@
                     const rec = attendanceData[`${emp.id}-${dKey}`] || { status:null, ot:0, nd:0, holidayType: 'none', site:'' };
                     return `
                         <td class="px-2 py-4 border-r text-center">
-                            <select onchange="updateAtt(${emp.id},'${dKey}','site',this.value)" class="site-select">
+                            <select onchange="updateAtt('${emp.id}','${dKey}','site',this.value)" class="site-select">
                                 <option value="">-- No Site --</option>
                                 ${sites.map(s => `<option value="${s}" ${rec.site===s?'selected':''}>${s}</option>`).join('')}
                             </select>
                             <div class="flex justify-center gap-1 mb-1">
-                                <button onclick="updateAtt(${emp.id},'${dKey}','status','p')" class="att-btn att-p ${rec.status==='p'?'active':''}">P</button>
-                                <button onclick="updateAtt(${emp.id},'${dKey}','status','a')" class="att-btn att-a ${rec.status==='a'?'active':''}">A</button>
+                                <button onclick="updateAtt('${emp.id}','${dKey}','status','p')" class="att-btn att-p ${rec.status==='p'?'active':''}">P</button>
+                                <button onclick="updateAtt('${emp.id}','${dKey}','status','a')" class="att-btn att-a ${rec.status==='a'?'active':''}">A</button>
                             </div>
                             <div class="space-y-1">
-                                <div class="flex items-center justify-between text-[9px] px-1">OT <input type="number" value="${rec.ot}" onchange="updateAtt(${emp.id},'${dKey}','ot',this.value)" class="mini-input"></div>
-                                <div class="flex items-center justify-between text-[9px] px-1">ND <input type="number" value="${rec.nd}" onchange="updateAtt(${emp.id},'${dKey}','nd',this.value)" class="mini-input"></div>
-                                <select onchange="updateAtt(${emp.id},'${dKey}','holidayType',this.value)" class="holiday-select ${rec.holidayType !== 'none' ? 'bg-blue-50 border-blue-400 text-blue-700' : 'text-gray-400'}">
+                                <div class="flex items-center justify-between text-[9px] px-1">OT <input type="number" value="${rec.ot}" onchange="updateAtt('${emp.id}','${dKey}','ot',this.value)" class="mini-input"></div>
+                                <div class="flex items-center justify-between text-[9px] px-1">ND <input type="number" value="${rec.nd}" onchange="updateAtt('${emp.id}','${dKey}','nd',this.value)" class="mini-input"></div>
+                                <select onchange="updateAtt('${emp.id}','${dKey}','holidayType',this.value)" class="holiday-select ${rec.holidayType !== 'none' ? 'bg-blue-50 border-blue-400 text-blue-700' : 'text-gray-400'}">
                                     <option value="none" ${rec.holidayType === 'none' ? 'selected' : ''}>NO HOLIDAY</option>
                                     <option value="regular" ${rec.holidayType === 'regular' ? 'selected' : ''}>REGULAR</option>
                                     <option value="special" ${rec.holidayType === 'special' ? 'selected' : ''}>SPECIAL</option>
@@ -436,59 +537,61 @@
                 }).join('');
                 return `<tr><td class="px-4 py-4 font-bold sticky left-0 bg-white z-10 shadow-sm border-r">${emp.name}</td>${dayCells}</tr>`;
             }).join('');
-        }
+        };
 
-        function updateAtt(empId, dKey, field, val) {
+        window.updateAtt = async (empId, dKey, field, val) => {
+            if(!currentUser) return;
             const key = `${empId}-${dKey}`;
-            if(!attendanceData[key]) attendanceData[key] = { status:null, ot:0, nd:0, holidayType:'none', site:'' };
-            if(field === 'status') attendanceData[key].status = (attendanceData[key].status === val) ? null : val;
-            else if(field === 'ot' || field === 'nd') attendanceData[key][field] = parseFloat(val) || 0;
-            else attendanceData[key][field] = val;
-            saveData(); initAttendanceTracker();
-        }
+            const existing = attendanceData[key] || { status:null, ot:0, nd:0, holidayType:'none', site:'' };
+            
+            let updated = { ...existing };
+            if(field === 'status') updated.status = (existing.status === val) ? null : val;
+            else if(field === 'ot' || field === 'nd') updated[field] = parseFloat(val) || 0;
+            else updated[field] = val;
+            
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance', key), updated);
+        };
 
-        function renderDeductionSettings() {
+        window.renderDeductionSettings = () => {
             const body = document.getElementById('deductionTableBody');
             body.innerHTML = employees.map(emp => {
                 const deds = deductionData[emp.id] || { sss:0, philhealth:0, pagibig:0, loan:0, unpaid:0, vale:0, voucher:0, coop:0 };
-                const total = Object.values(deds).reduce((a, b) => a + b, 0);
+                const total = Object.values(deds).reduce((a, b) => a + (parseFloat(b) || 0), 0);
                 return `
                     <tr class="hover:bg-slate-50 text-[11px]">
                         <td class="px-6 py-4 sticky left-0 bg-white z-10 border-r font-bold">${emp.name}</td>
-                        <td class="px-2 py-4 text-center"><input type="number" value="${deds.sss}" onchange="updateMasterDeduction(${emp.id},'sss',this.value)" class="deduct-input"></td>
-                        <td class="px-2 py-4 text-center"><input type="number" value="${deds.philhealth}" onchange="updateMasterDeduction(${emp.id},'philhealth',this.value)" class="deduct-input"></td>
-                        <td class="px-2 py-4 text-center"><input type="number" value="${deds.pagibig}" onchange="updateMasterDeduction(${emp.id},'pagibig',this.value)" class="deduct-input"></td>
-                        <td class="px-2 py-4 text-center"><input type="number" value="${deds.loan}" onchange="updateMasterDeduction(${emp.id},'loan',this.value)" class="deduct-input"></td>
-                        <td class="px-2 py-4 text-center"><input type="number" value="${deds.unpaid}" onchange="updateMasterDeduction(${emp.id},'unpaid',this.value)" class="deduct-input"></td>
-                        <td class="px-2 py-4 text-center"><input type="number" value="${deds.coop}" onchange="updateMasterDeduction(${emp.id},'coop',this.value)" class="deduct-input"></td>
-                        <td class="px-2 py-4 text-center"><input type="number" value="${deds.voucher}" onchange="updateMasterDeduction(${emp.id},'voucher',this.value)" class="deduct-input"></td>
-                        <td class="px-2 py-4 text-center"><input type="number" value="${deds.vale}" onchange="updateMasterDeduction(${emp.id},'vale',this.value)" class="deduct-input"></td>
+                        <td class="px-2 py-4 text-center"><input type="number" value="${deds.sss}" onchange="updateMasterDeduction('${emp.id}','sss',this.value)" class="deduct-input"></td>
+                        <td class="px-2 py-4 text-center"><input type="number" value="${deds.philhealth}" onchange="updateMasterDeduction('${emp.id}','philhealth',this.value)" class="deduct-input"></td>
+                        <td class="px-2 py-4 text-center"><input type="number" value="${deds.pagibig}" onchange="updateMasterDeduction('${emp.id}','pagibig',this.value)" class="deduct-input"></td>
+                        <td class="px-2 py-4 text-center"><input type="number" value="${deds.loan}" onchange="updateMasterDeduction('${emp.id}','loan',this.value)" class="deduct-input"></td>
+                        <td class="px-2 py-4 text-center"><input type="number" value="${deds.unpaid}" onchange="updateMasterDeduction('${emp.id}','unpaid',this.value)" class="deduct-input"></td>
+                        <td class="px-2 py-4 text-center"><input type="number" value="${deds.coop}" onchange="updateMasterDeduction('${emp.id}','coop',this.value)" class="deduct-input"></td>
+                        <td class="px-2 py-4 text-center"><input type="number" value="${deds.voucher}" onchange="updateMasterDeduction('${emp.id}','voucher',this.value)" class="deduct-input"></td>
+                        <td class="px-2 py-4 text-center"><input type="number" value="${deds.vale}" onchange="updateMasterDeduction('${emp.id}','vale',this.value)" class="deduct-input"></td>
                         <td class="px-6 py-4 text-right bg-red-50 font-bold text-red-600">₱${total.toLocaleString(undefined,{minimumFractionDigits:2})}</td>
                     </tr>
                 `;
             }).join('');
-        }
+        };
 
-        function updateMasterDeduction(empId, field, val) {
-            if(!deductionData[empId]) deductionData[empId] = { sss:0, philhealth:0, pagibig:0, loan:0, unpaid:0, vale:0, voucher:0, coop:0 };
-            deductionData[empId][field] = parseFloat(val) || 0;
-            saveData();
-            renderDeductionSettings();
-        }
+        window.updateMasterDeduction = async (empId, field, val) => {
+            if(!currentUser) return;
+            const existing = deductionData[empId] || { sss:0, philhealth:0, pagibig:0, loan:0, unpaid:0, vale:0, voucher:0, coop:0 };
+            const updated = { ...existing, [field]: parseFloat(val) || 0 };
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'deductions', empId), updated);
+        };
 
-        function renderPayrollSummary() {
+        window.renderPayrollSummary = () => {
             const dates = getCycleDates();
             const periodLabel = `${dates[0].toLocaleDateString()} - ${dates[6].toLocaleDateString()}`;
             document.getElementById('payrollPeriodLabel').innerText = `Period: ${periodLabel}`;
 
             const body = document.getElementById('payrollTableBody');
             body.innerHTML = '';
-
             let totalPayout = 0;
 
             employees.forEach(emp => {
                 let report = { days:0, otHrs:0, ndHrs:0, basicPay:0, extraPay:0, gross:0 };
-                // Get pre-saved deductions
                 const deds = deductionData[emp.id] || { sss:0, philhealth:0, pagibig:0, loan:0, unpaid:0, vale:0, voucher:0, coop:0 };
 
                 dates.forEach(d => {
@@ -518,7 +621,7 @@
                 });
 
                 report.gross = report.basicPay + report.extraPay;
-                const totalDeds = Object.values(deds).reduce((a, b) => a + b, 0);
+                const totalDeds = Object.values(deds).reduce((a, b) => a + (parseFloat(b) || 0), 0);
                 const netPay = report.gross - totalDeds;
                 totalPayout += netPay;
 
@@ -529,16 +632,13 @@
                         <td class="px-2 py-4 text-right">₱${report.basicPay.toLocaleString()}</td>
                         <td class="px-2 py-4 text-right">₱${report.extraPay.toLocaleString()}</td>
                         <td class="px-4 py-4 text-right font-bold bg-blue-50 border-r">₱${report.gross.toLocaleString()}</td>
-                        
-                        <!-- Deductions Synced (Display only/editable here too if needed) -->
-                        <td class="px-2 py-4 text-center">₱${deds.sss.toLocaleString()}</td>
-                        <td class="px-2 py-4 text-center">₱${deds.philhealth.toLocaleString()}</td>
-                        <td class="px-2 py-4 text-center">₱${deds.pagibig.toLocaleString()}</td>
-                        <td class="px-2 py-4 text-center">₱${(deds.loan + deds.unpaid).toLocaleString()}</td>
-                        <td class="px-2 py-4 text-center">₱${deds.vale.toLocaleString()}</td>
-                        <td class="px-2 py-4 text-center">₱${deds.voucher.toLocaleString()}</td>
-                        <td class="px-2 py-4 text-center">₱${deds.coop.toLocaleString()}</td>
-                        
+                        <td class="px-2 py-4 text-center">₱${(parseFloat(deds.sss) || 0).toLocaleString()}</td>
+                        <td class="px-2 py-4 text-center">₱${(parseFloat(deds.philhealth) || 0).toLocaleString()}</td>
+                        <td class="px-2 py-4 text-center">₱${(parseFloat(deds.pagibig) || 0).toLocaleString()}</td>
+                        <td class="px-2 py-4 text-center">₱${((parseFloat(deds.loan) || 0) + (parseFloat(deds.unpaid) || 0)).toLocaleString()}</td>
+                        <td class="px-2 py-4 text-center">₱${(parseFloat(deds.vale) || 0).toLocaleString()}</td>
+                        <td class="px-2 py-4 text-center">₱${(parseFloat(deds.voucher) || 0).toLocaleString()}</td>
+                        <td class="px-2 py-4 text-center">₱${(parseFloat(deds.coop) || 0).toLocaleString()}</td>
                         <td class="px-4 py-4 text-right font-bold text-red-600 bg-red-50 border-r">₱${totalDeds.toLocaleString()}</td>
                         <td class="px-4 py-4 text-right font-black text-slate-900 bg-yellow-100 border-l border-yellow-200">₱${netPay.toLocaleString(undefined,{minimumFractionDigits:2})}</td>
                     </tr>
@@ -546,12 +646,13 @@
             });
 
             document.getElementById('dashTotalPayroll').innerText = `₱ ${totalPayout.toLocaleString()}`;
-        }
+        };
 
-        function finalizePayroll() {
+        window.finalizePayroll = async () => {
+            if(!currentUser) return;
             const dates = getCycleDates();
             const period = `${dates[0].toLocaleDateString()} - ${dates[6].toLocaleDateString()}`;
-            if(!confirm(`I-save ang report para sa cycle na ito? Kapag itinuloy, mase-save ito sa history.`)) return;
+            if(!confirm(`I-save ang report para sa cycle na ito? Kapag itinuloy, mase-save ito sa cloud.`)) return;
             
             let total = 0;
             employees.forEach(emp => {
@@ -561,20 +662,21 @@
                     if(rec?.status === 'p') gross += (emp.rate + emp.allowance); 
                 });
                 const deds = deductionData[emp.id] || {};
-                const totalDeds = Object.values(deds).reduce((a, b) => a + b, 0);
+                const totalDeds = Object.values(deds).reduce((a, b) => a + (parseFloat(b) || 0), 0);
                 total += (gross - totalDeds);
             });
 
-            payrollHistory.unshift({
+            const histId = Date.now().toString();
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'history', histId), {
                 period: period,
                 totalPayout: total, 
                 status: 'Finalized',
                 dateFinalized: new Date().toLocaleString()
             });
-            saveData(); showSection('history');
-        }
+            showSection('history');
+        };
 
-        function renderSites() {
+        window.renderSites = () => {
             const list = document.getElementById('sitesList');
             list.innerHTML = sites.map((s, i) => `
                 <div class="flex justify-between items-center p-3 bg-slate-50 border rounded-lg">
@@ -582,16 +684,24 @@
                     <button onclick="deleteSite(${i})" class="text-red-400"><i class="fas fa-times"></i></button>
                 </div>
             `).join('');
-        }
+        };
 
-        document.getElementById('addSiteForm').addEventListener('submit', (e) => {
-            e.preventDefault(); sites.push(document.getElementById('newSiteName').value);
-            saveData(); renderSites(); toggleModal('site', false);
+        document.getElementById('addSiteForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if(!currentUser) return;
+            const newName = document.getElementById('newSiteName').value;
+            const updatedSites = [...sites, newName];
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'metadata', 'sites'), { list: updatedSites });
+            toggleModal('site', false);
         });
 
-        function deleteSite(i) { sites.splice(i,1); saveData(); renderSites(); }
+        window.deleteSite = async (i) => {
+            if(!currentUser) return;
+            const updatedSites = sites.filter((_, idx) => idx !== i);
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'metadata', 'sites'), { list: updatedSites });
+        };
 
-        function renderHistory() {
+        window.renderHistory = () => {
             const body = document.getElementById('historyTableBody');
             body.innerHTML = payrollHistory.map(h => `
                 <tr>
@@ -601,16 +711,17 @@
                     <td class="px-6 py-4 text-xs text-slate-400">${h.dateFinalized}</td>
                 </tr>
             `).join('');
-        }
+        };
 
-        function updateDashboard() {
+        window.updateDashboard = () => {
             document.getElementById('dashTotalEmp').innerText = employees.length;
             document.getElementById('dashTotalSites').innerText = sites.length;
             renderPayrollSummary();
-        }
+        };
 
-        window.onload = () => showSection('dashboard');
         document.getElementById('menuBtn').onclick = () => document.getElementById('sidebar').classList.toggle('-translate-x-full');
+        
+        init();
     </script>
 </body>
 </html>
