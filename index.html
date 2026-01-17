@@ -49,7 +49,7 @@
 
     <div id="loadingOverlay">
         <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500 mb-4"></div>
-        <p class="text-sm font-bold text-slate-600">Connecting to secure storage...</p>
+        <p class="text-sm font-bold text-slate-600">Kumokonekta sa secure storage...</p>
     </div>
 
     <!-- Sidebar -->
@@ -65,7 +65,7 @@
                 <i class="fas fa-chart-line w-6"></i><span class="ml-3">Dashboard</span>
             </a>
             <a href="#" onclick="showSection('employee')" class="flex items-center px-6 py-3 text-gray-300 hover:bg-slate-800 hover:text-white transition-colors border-l-4 border-transparent hover:border-yellow-400">
-                <i class="fas fa-users w-6"></i><span class="ml-3">Employee List</span>
+                <i class="fas fa-users w-6"></i><span class="ml-3">Listahan ng Empleyado</span>
             </a>
             <a href="#" onclick="showSection('sites')" class="flex items-center px-6 py-3 text-gray-300 hover:bg-slate-800 hover:text-white transition-colors border-l-4 border-transparent hover:border-yellow-400">
                 <i class="fas fa-map-marker-alt w-6"></i><span class="ml-3">Project Sites</span>
@@ -74,7 +74,7 @@
                 <i class="fas fa-calendar-check w-6"></i><span class="ml-3">Attendance Tracker</span>
             </a>
             <a href="#" onclick="showSection('deduction')" class="flex items-center px-6 py-3 text-gray-300 hover:bg-slate-800 hover:text-white transition-colors border-l-4 border-transparent hover:border-yellow-400">
-                <i class="fas fa-minus-circle w-6 text-red-400"></i><span class="ml-3">Deduction Settings</span>
+                <i class="fas fa-minus-circle w-6 text-red-400"></i><span class="ml-3">Settings ng Deduction</span>
             </a>
             <a href="#" onclick="showSection('payroll')" class="flex items-center px-6 py-3 text-gray-300 hover:bg-slate-800 hover:text-white transition-colors border-l-4 border-transparent hover:border-yellow-400">
                 <i class="fas fa-file-invoice-dollar w-6"></i><span class="ml-3">Payroll Summary</span>
@@ -100,7 +100,7 @@
             <section id="dashboardSection" class="block space-y-6">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                        <div class="text-gray-400 text-sm font-medium mb-1">Total Employees</div>
+                        <div class="text-gray-400 text-sm font-medium mb-1">Kabuuang Empleyado</div>
                         <div id="dashTotalEmp" class="text-3xl font-bold">0</div>
                     </div>
                     <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
@@ -108,7 +108,7 @@
                         <div id="dashTotalPayroll" class="text-3xl font-bold text-green-600">₱ 0.00</div>
                     </div>
                     <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                        <div class="text-gray-400 text-sm font-medium mb-1">Active Sites</div>
+                        <div class="text-gray-400 text-sm font-medium mb-1">Aktibong Sites</div>
                         <div id="dashTotalSites" class="text-3xl font-bold text-blue-600">0</div>
                     </div>
                 </div>
@@ -118,17 +118,17 @@
             <section id="employeeSection" class="hidden">
                 <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                     <div class="p-6 border-b border-gray-100 flex justify-between items-center">
-                        <h3 class="font-bold text-lg text-gray-700">Employee Masterlist</h3>
-                        <button onclick="toggleModal('employee', true)" class="bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-bold"><i class="fas fa-plus mr-2"></i> Add Employee</button>
+                        <h3 class="font-bold text-lg text-gray-700">Masterlist ng Empleyado</h3>
+                        <button onclick="toggleModal('employee', true)" class="bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-bold"><i class="fas fa-plus mr-2"></i> Magdagdag ng Empleyado</button>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left">
                             <thead class="bg-gray-50 text-[10px] uppercase font-bold text-gray-500 tracking-wider">
                                 <tr>
-                                    <th class="px-6 py-4">Employee Details</th>
-                                    <th class="px-6 py-4">Position</th>
+                                    <th class="px-6 py-4">Detalye ng Empleyado</th>
+                                    <th class="px-6 py-4">Posisyon</th>
                                     <th class="px-6 py-4 text-right">Rates</th>
-                                    <th class="px-6 py-4 text-center">Action</th>
+                                    <th class="px-6 py-4 text-center">Aksyon</th>
                                 </tr>
                             </thead>
                             <tbody id="employeeListBody" class="divide-y divide-gray-100"></tbody>
@@ -146,7 +146,7 @@
                             <p class="text-xs text-slate-500" id="currentAttendancePeriod">Cycle: ---</p>
                         </div>
                         <button onclick="showSection('payroll')" class="bg-yellow-400 text-slate-900 px-6 py-2 rounded-lg text-sm font-black hover:bg-yellow-500 shadow-md">
-                            <i class="fas fa-calculator mr-2"></i> Calculate Payroll
+                            <i class="fas fa-calculator mr-2"></i> Kalkulahin ang Payroll
                         </button>
                     </div>
                     <div class="overflow-x-auto custom-scrollbar">
@@ -168,13 +168,13 @@
                             <h3 class="font-bold text-xl text-red-900">Deduction Masterlist</h3>
                             <p class="text-xs text-red-600 italic">Ang mga values dito ay kusang mag-aappear sa payroll summary kada linggo.</p>
                         </div>
-                        <div class="text-xs font-bold text-slate-400 uppercase">Manage Recurring Deductions</div>
+                        <div class="text-xs font-bold text-slate-400 uppercase">I-manage ang Recurring Deductions</div>
                     </div>
                     <div class="overflow-x-auto custom-scrollbar">
                         <table class="w-full text-left border-collapse min-w-[1200px]">
                             <thead class="bg-slate-100 text-slate-500 text-[10px] uppercase font-bold">
                                 <tr>
-                                    <th class="px-6 py-4 sticky left-0 bg-slate-100 z-10 border-r min-w-[200px]">Employee Name</th>
+                                    <th class="px-6 py-4 sticky left-0 bg-slate-100 z-10 border-r min-w-[200px]">Pangalan ng Empleyado</th>
                                     <th class="px-2 py-4 text-center">SSS</th>
                                     <th class="px-2 py-4 text-center">PhilHealth</th>
                                     <th class="px-2 py-4 text-center">Pag-IBIG</th>
@@ -183,7 +183,7 @@
                                     <th class="px-2 py-4 text-center">Coop 2025</th>
                                     <th class="px-2 py-4 text-center">C/A Voucher</th>
                                     <th class="px-2 py-4 text-center">Daily Vale</th>
-                                    <th class="px-6 py-4 text-right bg-red-100 text-red-700">Total Fixed</th>
+                                    <th class="px-6 py-4 text-right bg-red-100 text-red-700">Kabuuang Fixed</th>
                                 </tr>
                             </thead>
                             <tbody id="deductionTableBody" class="divide-y divide-gray-100"></tbody>
@@ -202,10 +202,10 @@
                         </div>
                         <div class="flex gap-2">
                              <button onclick="window.print()" class="bg-slate-700 text-white px-4 py-2 rounded-lg text-sm font-bold border border-slate-600">
-                                <i class="fas fa-print mr-2"></i> Print Report
+                                <i class="fas fa-print mr-2"></i> I-print ang Report
                             </button>
                             <button onclick="finalizePayroll()" class="bg-green-500 text-white px-6 py-2 rounded-lg text-sm font-black hover:bg-green-600 transition-all shadow-lg">
-                                <i class="fas fa-check-double mr-2"></i> Finalize & Save
+                                <i class="fas fa-check-double mr-2"></i> Finalize at I-save
                             </button>
                         </div>
                     </div>
@@ -214,7 +214,7 @@
                         <table class="w-full text-left border-collapse min-w-[1800px]">
                             <thead class="bg-slate-50 text-slate-500 text-[9px] uppercase font-bold border-b">
                                 <tr>
-                                    <th rowspan="2" class="px-4 py-5 sticky left-0 bg-slate-50 z-20 border-r min-w-[200px]">Employee Name</th>
+                                    <th rowspan="2" class="px-4 py-5 sticky left-0 bg-slate-50 z-20 border-r min-w-[200px]">Pangalan ng Empleyado</th>
                                     <th colspan="4" class="px-2 py-2 text-center border-r bg-slate-100/50">Earnings</th>
                                     <th colspan="8" class="px-2 py-2 text-center border-r bg-red-50">Deductions (Synced from Masterlist)</th>
                                     <th rowspan="2" class="px-4 py-5 text-right bg-yellow-100 font-black text-slate-900 border-l border-yellow-200">Net Salary</th>
@@ -246,7 +246,7 @@
                 <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                     <div class="flex justify-between items-center mb-6">
                         <h3 class="font-bold text-lg">Project Sites</h3>
-                        <button onclick="toggleModal('site', true)" class="bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-bold">Add Site</button>
+                        <button onclick="toggleModal('site', true)" class="bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-bold">Magdagdag ng Site</button>
                     </div>
                     <div id="sitesList" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
                 </div>
@@ -261,9 +261,9 @@
                             <thead class="bg-gray-50 text-[10px] uppercase font-bold text-gray-500">
                                 <tr>
                                     <th class="px-6 py-4">Period</th>
-                                    <th class="px-6 py-4">Total Payout</th>
+                                    <th class="px-6 py-4">Kabuuang Payout</th>
                                     <th class="px-6 py-4">Status</th>
-                                    <th class="px-6 py-4">Date Finalized</th>
+                                    <th class="px-6 py-4">Petsa ng Pag-Finalize</th>
                                 </tr>
                             </thead>
                             <tbody id="historyTableBody" class="divide-y divide-gray-100"></tbody>
@@ -298,8 +298,8 @@
                     </div>
                 </div>
                 <div class="flex gap-3">
-                    <button type="button" onclick="toggleModal('employee', false)" class="flex-1 py-3 bg-gray-100 rounded-xl font-bold">Cancel</button>
-                    <button type="submit" class="flex-1 py-3 bg-yellow-400 rounded-xl font-black shadow-lg">Save Employee</button>
+                    <button type="button" onclick="toggleModal('employee', false)" class="flex-1 py-3 bg-gray-100 rounded-xl font-bold">Kanselahin</button>
+                    <button type="submit" class="flex-1 py-3 bg-yellow-400 rounded-xl font-black shadow-lg">I-save ang Empleyado</button>
                 </div>
             </form>
         </div>
@@ -307,12 +307,12 @@
 
     <div id="siteModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[100] flex items-center justify-center hidden p-4">
         <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6">
-            <h3 class="text-xl font-bold mb-4">Add Project Site</h3>
+            <h3 class="text-xl font-bold mb-4">Magdagdag ng Project Site</h3>
             <form id="addSiteForm" class="space-y-4">
                 <input type="text" id="newSiteName" placeholder="Site Name" required class="w-full p-2 border rounded-lg outline-none">
                 <div class="flex gap-2">
-                    <button type="button" onclick="toggleModal('site', false)" class="flex-1 py-2 bg-gray-100 rounded-lg font-bold">Cancel</button>
-                    <button type="submit" class="flex-1 py-2 bg-yellow-400 rounded-lg font-bold">Add</button>
+                    <button type="button" onclick="toggleModal('site', false)" class="flex-1 py-2 bg-gray-100 rounded-lg font-bold">Kanselahin</button>
+                    <button type="submit" class="flex-1 py-2 bg-yellow-400 rounded-lg font-bold">Idagdag</button>
                 </div>
             </form>
         </div>
@@ -324,17 +324,8 @@
         import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc, collection, query, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Firebase Config
-        const firebaseConfig = {
-            apiKey: "AIzaSyCHkN4FS6sGXIs8cleBwr5yIcjBn3Olt10",
-            authDomain: "dlvsys.firebaseapp.com",
-            projectId: "dlvsys",
-            storageBucket: "dlvsys.firebasestorage.app",
-            messagingSenderId: "332557308953",
-            appId: "1:332557308953:web:ffa160a0e41734c7690688",
-            measurementId: "G-7K33YZ93J8"
-        };
-
+        // Global Variables na ibinigay ng environment
+        const firebaseConfig = JSON.parse(__firebase_config);
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
@@ -346,10 +337,10 @@
         let attendanceData = {};
         let deductionData = {};
         let payrollHistory = [];
-        let currentUser = null;
+        let user = null;
 
-        // Initialize App
-        const init = async () => {
+        // Initialize Authentication (RULE 3: Auth Before Queries)
+        const initAuth = async () => {
             try {
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
@@ -358,58 +349,79 @@
                 }
             } catch (err) {
                 console.error("Auth error:", err);
+                // Fallback kung sakaling may isyu ang token
+                await signInAnonymously(auth);
             }
         };
 
-        onAuthStateChanged(auth, (user) => {
-            currentUser = user;
-            if (user) {
-                document.getElementById('authStatus').innerText = `Connected: ${user.uid.slice(0,8)}...`;
+        // Listen for Auth State changes
+        onAuthStateChanged(auth, (u) => {
+            user = u;
+            if (u) {
+                document.getElementById('authStatus').innerText = `Connected: ${u.uid}`;
                 document.getElementById('loadingOverlay').style.display = 'none';
-                setupListeners(user.uid);
+                // Magsimula ng listeners kapag authenticated na (RULE 3)
+                startListeners(u.uid);
             } else {
                 document.getElementById('authStatus').innerText = "Disconnected";
+                document.getElementById('loadingOverlay').style.display = 'flex';
             }
         });
 
-        const setupListeners = (userId) => {
-            const publicPath = (coll) => collection(db, 'artifacts', appId, 'public', 'data', coll);
-            
-            // Listen to Employees
-            onSnapshot(publicPath('employees'), (snapshot) => {
-                employees = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                updateDashboard();
-                if (document.getElementById('employeeSection').classList.contains('block')) renderEmployeeList();
-            }, (err) => console.error("Employee listener error:", err));
+        // RULE 1: Strict Paths - Gumagamit ng public data path
+        const startListeners = (userId) => {
+            if (!user) return;
 
-            // Listen to Sites
-            onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'metadata', 'sites'), (snapshot) => {
-                if (snapshot.exists()) sites = snapshot.data().list || ["Office"];
-                if (document.getElementById('sitesSection').classList.contains('block')) renderSites();
-            }, (err) => console.error("Sites listener error:", err));
+            // Employees Listener
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'employees'), 
+                (snapshot) => {
+                    employees = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    updateDashboard();
+                    if (!document.getElementById('employeeSection').classList.contains('hidden')) renderEmployeeList();
+                }, 
+                (err) => console.error("Employee listener error:", err)
+            );
 
-            // Listen to Attendance
-            onSnapshot(publicPath('attendance'), (snapshot) => {
-                attendanceData = {};
-                snapshot.docs.forEach(doc => { attendanceData[doc.id] = doc.data(); });
-                if (document.getElementById('attendanceSection').classList.contains('block')) initAttendanceTracker();
-            }, (err) => console.error("Attendance listener error:", err));
+            // Metadata/Sites Listener
+            onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'metadata', 'sites'), 
+                (snapshot) => {
+                    if (snapshot.exists()) sites = snapshot.data().list || ["Office"];
+                    if (!document.getElementById('sitesSection').classList.contains('hidden')) renderSites();
+                }, 
+                (err) => console.error("Sites listener error:", err)
+            );
 
-            // Listen to Deductions
-            onSnapshot(publicPath('deductions'), (snapshot) => {
-                deductionData = {};
-                snapshot.docs.forEach(doc => { deductionData[doc.id] = doc.data(); });
-                if (document.getElementById('deductionSection').classList.contains('block')) renderDeductionSettings();
-            }, (err) => console.error("Deduction listener error:", err));
+            // Attendance Listener
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'attendance'), 
+                (snapshot) => {
+                    attendanceData = {};
+                    snapshot.docs.forEach(doc => { attendanceData[doc.id] = doc.data(); });
+                    if (!document.getElementById('attendanceSection').classList.contains('hidden')) initAttendanceTracker();
+                }, 
+                (err) => console.error("Attendance listener error:", err)
+            );
 
-            // Listen to History
-            onSnapshot(publicPath('history'), (snapshot) => {
-                payrollHistory = snapshot.docs.map(doc => doc.data()).sort((a,b) => new Date(b.dateFinalized) - new Date(a.dateFinalized));
-                if (document.getElementById('historySection').classList.contains('block')) renderHistory();
-            }, (err) => console.error("History listener error:", err));
+            // Deductions Listener
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'deductions'), 
+                (snapshot) => {
+                    deductionData = {};
+                    snapshot.docs.forEach(doc => { deductionData[doc.id] = doc.data(); });
+                    if (!document.getElementById('deductionSection').classList.contains('hidden')) renderDeductionSettings();
+                }, 
+                (err) => console.error("Deduction listener error:", err)
+            );
+
+            // History Listener
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'history'), 
+                (snapshot) => {
+                    payrollHistory = snapshot.docs.map(doc => doc.data()).sort((a,b) => new Date(b.dateFinalized) - new Date(a.dateFinalized));
+                    if (!document.getElementById('historySection').classList.contains('hidden')) renderHistory();
+                }, 
+                (err) => console.error("History listener error:", err)
+            );
         };
 
-        // Exposed functions to window
+        // UI Handlers
         window.showSection = (section) => {
             const sections = ['dashboardSection', 'employeeSection', 'sitesSection', 'attendanceSection', 'payrollSection', 'historySection', 'deductionSection'];
             sections.forEach(s => document.getElementById(s).classList.add('hidden'));
@@ -423,7 +435,7 @@
             if(section === 'history') renderHistory();
             if(section === 'deduction') renderDeductionSettings();
 
-            document.getElementById('pageTitle').innerText = section.charAt(0).toUpperCase() + section.slice(1).replace('Section','');
+            document.getElementById('pageTitle').innerText = section.charAt(0).toUpperCase() + section.slice(1);
             if (window.innerWidth < 768) document.getElementById('sidebar').classList.add('-translate-x-full');
         };
 
@@ -468,7 +480,7 @@
 
         document.getElementById('addEmployeeForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (!currentUser) return;
+            if (!user) return;
             const id = Date.now().toString();
             const newEmp = {
                 name: document.getElementById('newName').value,
@@ -487,7 +499,7 @@
         });
 
         window.deleteEmployee = async (id) => {
-            if(!currentUser) return;
+            if(!user) return;
             if(confirm("Burahin ang empleyadong ito? Mabubura rin ang kanyang deduction data.")) {
                 await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'employees', id));
                 await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'deductions', id));
@@ -540,7 +552,7 @@
         };
 
         window.updateAtt = async (empId, dKey, field, val) => {
-            if(!currentUser) return;
+            if(!user) return;
             const key = `${empId}-${dKey}`;
             const existing = attendanceData[key] || { status:null, ot:0, nd:0, holidayType:'none', site:'' };
             
@@ -575,7 +587,7 @@
         };
 
         window.updateMasterDeduction = async (empId, field, val) => {
-            if(!currentUser) return;
+            if(!user) return;
             const existing = deductionData[empId] || { sss:0, philhealth:0, pagibig:0, loan:0, unpaid:0, vale:0, voucher:0, coop:0 };
             const updated = { ...existing, [field]: parseFloat(val) || 0 };
             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'deductions', empId), updated);
@@ -649,7 +661,7 @@
         };
 
         window.finalizePayroll = async () => {
-            if(!currentUser) return;
+            if(!user) return;
             const dates = getCycleDates();
             const period = `${dates[0].toLocaleDateString()} - ${dates[6].toLocaleDateString()}`;
             if(!confirm(`I-save ang report para sa cycle na ito? Kapag itinuloy, mase-save ito sa cloud.`)) return;
@@ -688,7 +700,7 @@
 
         document.getElementById('addSiteForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            if(!currentUser) return;
+            if(!user) return;
             const newName = document.getElementById('newSiteName').value;
             const updatedSites = [...sites, newName];
             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'metadata', 'sites'), { list: updatedSites });
@@ -696,7 +708,7 @@
         });
 
         window.deleteSite = async (i) => {
-            if(!currentUser) return;
+            if(!user) return;
             const updatedSites = sites.filter((_, idx) => idx !== i);
             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'metadata', 'sites'), { list: updatedSites });
         };
@@ -721,7 +733,8 @@
 
         document.getElementById('menuBtn').onclick = () => document.getElementById('sidebar').classList.toggle('-translate-x-full');
         
-        init();
+        // Magsimula ng Authentication
+        initAuth();
     </script>
 </body>
 </html>
