@@ -3,46 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DLV Electrical Services - Professional Management System</title>
+    <title>DLV Electrical Services - Enhanced Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
         
-        :root {
-            --primary: #fbbf24;
-            --secondary: #0f172a;
-        }
-
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif; 
             background-color: #f8fafc;
         }
 
-        /* Specialized Components */
+        /* Pinatingkad na Attendance Buttons */
         .att-btn {
-            @apply w-8 h-8 flex items-center justify-center rounded-lg text-[10px] font-bold border transition-all;
+            @apply w-10 h-10 flex items-center justify-center rounded-xl text-sm font-black border-2 transition-all duration-200 shadow-sm;
         }
-        .att-p.active { @apply bg-emerald-500 text-white border-emerald-600 shadow-sm shadow-emerald-100; }
-        .att-a.active { @apply bg-rose-500 text-white border-rose-600 shadow-sm shadow-rose-100; }
+        
+        /* Present Button - Emerald Green */
+        .att-p { @apply border-slate-200 bg-white text-slate-300 hover:border-emerald-500 hover:text-emerald-500; }
+        .att-p.active { 
+            @apply bg-emerald-600 text-white border-emerald-700 shadow-emerald-200 ring-4 ring-emerald-100; 
+            transform: scale(1.1);
+        }
+
+        /* Absent Button - Rose Red */
+        .att-a { @apply border-slate-200 bg-white text-slate-300 hover:border-rose-500 hover:text-rose-500; }
+        .att-a.active { 
+            @apply bg-rose-600 text-white border-rose-700 shadow-rose-200 ring-4 ring-rose-100;
+            transform: scale(1.1);
+        }
         
         .form-input-styled {
-            @apply w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none transition-all font-medium text-sm;
+            @apply w-full px-4 py-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none transition-all font-bold text-xs;
         }
 
         .table-sticky-col {
             @apply sticky left-0 z-20 bg-white border-r border-slate-100;
         }
 
-        .custom-scrollbar::-webkit-scrollbar { height: 6px; width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar { height: 8px; width: 8px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
 
         @media print {
             .no-print { display: none !important; }
             .print-only { display: block !important; }
-            body { background: white; }
+            body { background: white; padding: 0; }
             .md\:ml-64 { margin-left: 0 !important; }
+            .shadow-xl, .shadow-sm { shadow: none !important; border: 1px solid #ddd !important; }
         }
 
         #loader {
@@ -53,7 +61,6 @@
 </head>
 <body class="text-slate-900">
 
-    <!-- Loading State -->
     <div id="loader">
         <div class="text-center">
             <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-yellow-400 border-t-transparent mb-4"></div>
@@ -61,114 +68,93 @@
         </div>
     </div>
 
-    <!-- Sidebar Navigation -->
+    <!-- Sidebar -->
     <aside class="fixed inset-y-0 left-0 w-64 bg-slate-900 text-white transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out z-50 no-print" id="sidebar">
         <div class="p-8">
             <div class="flex items-center gap-3 mb-2">
                 <div class="w-8 h-8 bg-yellow-400 rounded-lg flex items-center justify-center text-slate-900 font-black">D</div>
-                <h1 class="text-lg font-extrabold tracking-tight">DLV ELECT.</h1>
+                <h1 class="text-lg font-extrabold tracking-tight italic">DLV ELECT.</h1>
             </div>
-            <p class="text-[9px] text-slate-400 font-bold uppercase tracking-[0.2em]">Management Console</p>
+            <p class="text-[9px] text-slate-400 font-bold uppercase tracking-[0.2em]">Payroll & Attendance</p>
         </div>
         
         <nav class="mt-4 px-4 space-y-1">
-            <p class="px-4 text-[10px] font-black text-slate-500 uppercase mb-2">Pangunahin</p>
-            <button onclick="nav('dashboard')" class="nav-link w-full flex items-center px-4 py-3 rounded-xl transition-all hover:bg-slate-800 group" data-section="dashboard">
-                <i class="fas fa-grid-2 w-5 text-slate-400 group-hover:text-yellow-400"></i>
+            <button onclick="nav('dashboard')" class="nav-link w-full flex items-center px-4 py-3 rounded-xl hover:bg-slate-800 transition-all group" data-section="dashboard">
+                <i class="fas fa-chart-pie w-5 text-slate-400 group-hover:text-yellow-400"></i>
                 <span class="ml-3 text-sm font-semibold">Dashboard</span>
             </button>
-            <button onclick="nav('attendance')" class="nav-link w-full flex items-center px-4 py-3 rounded-xl transition-all hover:bg-slate-800 group" data-section="attendance">
+            <button onclick="nav('attendance')" class="nav-link w-full flex items-center px-4 py-3 rounded-xl hover:bg-slate-800 transition-all group" data-section="attendance">
                 <i class="fas fa-calendar-check w-5 text-slate-400 group-hover:text-yellow-400"></i>
-                <span class="ml-3 text-sm font-semibold">Attendance</span>
+                <span class="ml-3 text-sm font-semibold">Attendance Entry</span>
             </button>
-            
-            <p class="px-4 text-[10px] font-black text-slate-500 uppercase mt-6 mb-2">Financiyal</p>
-            <button onclick="nav('payroll')" class="nav-link w-full flex items-center px-4 py-3 rounded-xl transition-all hover:bg-slate-800 group" data-section="payroll">
-                <i class="fas fa-money-check-dollar w-5 text-emerald-400"></i>
-                <span class="ml-3 text-sm font-bold">Payroll Summary</span>
+            <button onclick="nav('payroll')" class="nav-link w-full flex items-center px-4 py-3 rounded-xl hover:bg-slate-800 transition-all group" data-section="payroll">
+                <i class="fas fa-receipt w-5 text-emerald-400 group-hover:text-emerald-300"></i>
+                <span class="ml-3 text-sm font-bold">Payroll Report</span>
             </button>
-            <button onclick="nav('deduction')" class="nav-link w-full flex items-center px-4 py-3 rounded-xl transition-all hover:bg-slate-800 group" data-section="deduction">
-                <i class="fas fa-percent w-5 text-rose-400"></i>
-                <span class="ml-3 text-sm font-semibold">Deduction Settings</span>
+            <button onclick="nav('deduction')" class="nav-link w-full flex items-center px-4 py-3 rounded-xl hover:bg-slate-800 transition-all group" data-section="deduction">
+                <i class="fas fa-minus-circle w-5 text-rose-400"></i>
+                <span class="ml-3 text-sm font-semibold">Deductions</span>
             </button>
-            <button onclick="nav('history')" class="nav-link w-full flex items-center px-4 py-3 rounded-xl transition-all hover:bg-slate-800 group" data-section="history">
-                <i class="fas fa-clock-rotate-left w-5 text-blue-400"></i>
-                <span class="ml-3 text-sm font-semibold">Archives</span>
-            </button>
-
-            <p class="px-4 text-[10px] font-black text-slate-500 uppercase mt-6 mb-2">Setup</p>
-            <button onclick="nav('employee')" class="nav-link w-full flex items-center px-4 py-3 rounded-xl transition-all hover:bg-slate-800 group" data-section="employee">
-                <i class="fas fa-user-gear w-5 text-slate-400"></i>
+            <button onclick="nav('employee')" class="nav-link w-full flex items-center px-4 py-3 rounded-xl hover:bg-slate-800 transition-all group" data-section="employee">
+                <i class="fas fa-users w-5 text-blue-400"></i>
                 <span class="ml-3 text-sm font-semibold">Workers</span>
             </button>
-            <button onclick="nav('sites')" class="nav-link w-full flex items-center px-4 py-3 rounded-xl transition-all hover:bg-slate-800 group" data-section="sites">
-                <i class="fas fa-location-dot w-5 text-slate-400"></i>
-                <span class="ml-3 text-sm font-semibold">Project Sites</span>
+            <button onclick="nav('history')" class="nav-link w-full flex items-center px-4 py-3 rounded-xl hover:bg-slate-800 transition-all group" data-section="history">
+                <i class="fas fa-archive w-5 text-slate-400"></i>
+                <span class="ml-3 text-sm font-semibold">History</span>
             </button>
         </nav>
     </aside>
 
-    <!-- Content Wrapper -->
     <div class="md:ml-64 min-h-screen flex flex-col">
         <!-- Top Bar -->
-        <header class="bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-slate-100 px-6 py-4 flex justify-between items-center no-print">
+        <header class="bg-white border-b border-slate-100 px-6 py-4 flex justify-between items-center no-print">
             <div class="flex items-center gap-4">
                 <button class="md:hidden text-slate-600" id="menuBtn"><i class="fas fa-bars-staggered"></i></button>
-                <h2 class="text-sm font-extrabold uppercase tracking-tight text-slate-500" id="currentSectionTitle">Dashboard</h2>
+                <h2 class="text-sm font-black uppercase tracking-widest text-slate-400" id="currentSectionTitle">Dashboard</h2>
             </div>
             
             <div class="flex items-center gap-4">
                 <div class="bg-slate-50 border border-slate-200 rounded-full px-4 py-1.5 flex items-center gap-2">
-                    <span class="text-[9px] font-black text-slate-400 uppercase">Cycle:</span>
-                    <input type="date" id="cycleDateInput" onchange="updateCycle(this.value)" class="bg-transparent text-xs font-bold outline-none cursor-pointer text-slate-700">
+                    <span class="text-[9px] font-black text-slate-400 uppercase">Linggo ng:</span>
+                    <input type="date" id="cycleDateInput" onchange="updateCycle(this.value)" class="bg-transparent text-xs font-bold outline-none cursor-pointer">
                 </div>
-                <div class="h-8 w-[1px] bg-slate-200"></div>
-                <button class="text-slate-400 hover:text-slate-600"><i class="fas fa-bell"></i></button>
-                <div class="w-8 h-8 rounded-full bg-slate-900 border-2 border-yellow-400 shadow-sm"></div>
             </div>
         </header>
 
-        <!-- Dynamic Main Content -->
-        <main class="p-6 lg:p-10 flex-grow">
+        <main class="p-6">
             
-            <!-- SECTION: Dashboard -->
-            <section id="section-dashboard" class="content-section space-y-8">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="p-3 bg-blue-50 text-blue-600 rounded-2xl"><i class="fas fa-users-viewfinder"></i></div>
-                            <span class="text-[10px] font-black text-emerald-500 bg-emerald-50 px-2 py-1 rounded-full">+12%</span>
-                        </div>
-                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Active Workers</p>
-                        <h3 class="text-3xl font-black mt-1" id="stat-workers">0</h3>
+            <!-- Dashboard -->
+            <section id="section-dashboard" class="content-section space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Active Workers</p>
+                        <h3 class="text-4xl font-black mt-2" id="stat-workers">0</h3>
                     </div>
-                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="p-3 bg-emerald-50 text-emerald-600 rounded-2xl"><i class="fas fa-coins"></i></div>
-                        </div>
-                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Estimated Payroll</p>
-                        <h3 class="text-3xl font-black mt-1 text-emerald-600" id="stat-payroll">₱ 0.00</h3>
+                    <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Est. Weekly Total</p>
+                        <h3 class="text-4xl font-black mt-2 text-emerald-600" id="stat-payroll">₱ 0.00</h3>
                     </div>
                 </div>
             </section>
 
-            <!-- SECTION: Attendance -->
+            <!-- Attendance Entry -->
             <section id="section-attendance" class="content-section hidden">
                 <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
-                    <div class="p-6 border-b border-slate-50 flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div class="p-6 bg-slate-50 border-b flex justify-between items-center">
                         <div>
-                            <h3 class="font-black text-lg">Attendance Entry</h3>
-                            <p class="text-xs text-slate-400 font-medium" id="attendanceRangeText">---</p>
+                            <h3 class="font-black text-slate-800">Attendance Log</h3>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase" id="attendanceRangeText"></p>
                         </div>
                         <div class="flex gap-2">
-                            <button onclick="shiftCycle(-7)" class="p-2.5 bg-slate-50 rounded-xl hover:bg-slate-100 border border-slate-200"><i class="fas fa-chevron-left text-xs"></i></button>
-                            <button onclick="shiftCycle(7)" class="p-2.5 bg-slate-50 rounded-xl hover:bg-slate-100 border border-slate-200"><i class="fas fa-chevron-right text-xs"></i></button>
+                            <button onclick="shiftCycle(-7)" class="p-2 bg-white border rounded-lg hover:bg-slate-50"><i class="fas fa-chevron-left"></i></button>
+                            <button onclick="shiftCycle(7)" class="p-2 bg-white border rounded-lg hover:bg-slate-50"><i class="fas fa-chevron-right"></i></button>
                         </div>
                     </div>
                     <div class="overflow-x-auto custom-scrollbar">
-                        <table class="w-full text-left border-collapse min-w-[1200px]">
-                            <thead class="bg-slate-50/50">
-                                <tr id="attendanceHeader"></tr>
+                        <table class="w-full text-left border-collapse min-w-[1400px]">
+                            <thead>
+                                <tr id="attendanceHeader" class="bg-slate-50/50 border-b"></tr>
                             </thead>
                             <tbody id="attendanceBody" class="divide-y divide-slate-100"></tbody>
                         </table>
@@ -176,44 +162,36 @@
                 </div>
             </section>
 
-            <!-- SECTION: Payroll Summary -->
+            <!-- Payroll Summary (Detailed) -->
             <section id="section-payroll" class="content-section hidden">
                 <div class="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
                     <div class="p-8 bg-slate-900 text-white flex flex-col md:flex-row justify-between items-center gap-6 no-print">
                         <div>
-                            <div class="flex items-center gap-3 mb-1">
-                                <span class="px-2 py-0.5 bg-emerald-500 text-[10px] font-black rounded uppercase">Live</span>
-                                <h3 class="font-black text-2xl tracking-tighter uppercase">Weekly Payroll Report</h3>
-                            </div>
-                            <p class="text-xs text-slate-400 font-bold tracking-widest uppercase" id="payrollSubTitle">---</p>
+                            <h3 class="font-black text-2xl uppercase italic">Weekly Payroll Summary</h3>
+                            <p class="text-xs text-slate-400 font-bold tracking-widest uppercase" id="payrollSubTitle"></p>
                         </div>
                         <div class="flex gap-3">
-                            <button onclick="window.print()" class="bg-slate-800 text-slate-300 px-6 py-3 rounded-2xl text-xs font-bold hover:text-white transition-all"><i class="fas fa-print mr-2"></i> Print</button>
-                            <button id="btn-save-payroll" onclick="finalizePayroll()" class="bg-yellow-400 text-slate-900 px-8 py-3 rounded-2xl text-xs font-black hover:bg-yellow-300 shadow-lg shadow-yellow-400/20">Finalize & Lock</button>
+                            <button onclick="window.print()" class="bg-slate-800 px-6 py-3 rounded-2xl text-xs font-bold hover:bg-slate-700 transition-all"><i class="fas fa-print mr-2"></i> Print</button>
+                            <button id="btn-save-payroll" onclick="finalizePayroll()" class="bg-yellow-400 text-slate-900 px-8 py-3 rounded-2xl text-xs font-black hover:bg-yellow-300">Finalize & Archive</button>
                         </div>
-                    </div>
-
-                    <!-- Header for Print -->
-                    <div class="hidden print-only p-10 text-center border-b-4 border-slate-900">
-                        <h1 class="text-3xl font-black mb-1">DLV ELECTRICAL SERVICES CO.</h1>
-                        <p class="text-sm font-bold text-slate-500 uppercase tracking-[0.3em]">Official Payroll Document</p>
-                        <p class="text-md font-bold mt-4" id="printHeaderPeriod"></p>
                     </div>
 
                     <div class="overflow-x-auto custom-scrollbar">
-                        <table class="w-full text-left border-collapse min-w-[2000px]">
+                        <table class="w-full text-left border-collapse min-w-[2400px]">
                             <thead>
-                                <tr class="bg-slate-50 text-[10px] font-black uppercase tracking-widest text-slate-500 border-b">
-                                    <th rowspan="2" class="px-6 py-6 table-sticky-col min-w-[250px]">Employee Information</th>
-                                    <th colspan="5" class="px-4 py-4 text-center border-x bg-blue-50/30">Detailed Earnings (KITA)</th>
-                                    <th colspan="8" class="px-4 py-4 text-center border-x bg-rose-50/30">Deductions (BAWAS)</th>
-                                    <th rowspan="2" class="px-8 py-6 text-right bg-emerald-500 text-white font-black text-lg border-l border-emerald-600">Net Take Home</th>
+                                <tr class="bg-slate-100 text-[10px] font-black uppercase text-slate-500 border-b">
+                                    <th rowspan="2" class="px-6 py-6 table-sticky-col min-w-[250px]">Employee</th>
+                                    <th colspan="7" class="px-4 py-4 text-center border-x bg-blue-50/50">Earnings (Kita)</th>
+                                    <th colspan="8" class="px-4 py-4 text-center border-x bg-rose-50/50">Deductions (Bawas)</th>
+                                    <th rowspan="2" class="px-8 py-6 text-right bg-emerald-600 text-white font-black text-xl">Net Pay</th>
                                 </tr>
-                                <tr class="bg-slate-100/50 text-[9px] font-bold text-slate-400 border-b">
+                                <tr class="bg-slate-50 text-[9px] font-bold text-slate-400 border-b uppercase">
                                     <th class="px-4 py-3 text-center">Days</th>
                                     <th class="px-4 py-3 text-right">Basic Pay</th>
                                     <th class="px-4 py-3 text-right">Allowance</th>
-                                    <th class="px-4 py-3 text-right">OT/Hol/ND</th>
+                                    <th class="px-4 py-3 text-right text-blue-600">OT Pay</th>
+                                    <th class="px-4 py-3 text-right text-blue-600">Hol. Pay</th>
+                                    <th class="px-4 py-3 text-right text-blue-600">Night Diff</th>
                                     <th class="px-6 py-3 text-right bg-blue-100 text-blue-700 font-black border-r">Gross</th>
                                     <th class="px-3 py-3 text-center">SSS</th>
                                     <th class="px-3 py-3 text-center">PhilH</th>
@@ -222,7 +200,7 @@
                                     <th class="px-3 py-3 text-center">Vale</th>
                                     <th class="px-3 py-3 text-center">Voucher</th>
                                     <th class="px-3 py-3 text-center">Coop</th>
-                                    <th class="px-6 py-3 text-right bg-rose-100 text-rose-700 font-black">Total Ded.</th>
+                                    <th class="px-6 py-3 text-right bg-rose-100 text-rose-700 font-black">Total</th>
                                 </tr>
                             </thead>
                             <tbody id="payrollTableBody" class="divide-y divide-slate-100"></tbody>
@@ -231,34 +209,35 @@
                 </div>
             </section>
 
-            <!-- Other sections follow similar clean structures... -->
+            <!-- Workers Section -->
             <section id="section-employee" class="content-section hidden">
-                <div class="flex justify-between items-center mb-8">
-                    <h3 class="text-2xl font-black">Worker Masterlist</h3>
-                    <button onclick="openModal('worker')" class="bg-slate-900 text-white px-6 py-3 rounded-2xl text-xs font-black shadow-xl">Add Worker</button>
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-black">Worker Masterlist</h3>
+                    <button onclick="openModal('worker')" class="bg-slate-900 text-white px-6 py-3 rounded-2xl text-xs font-black">Add Worker</button>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="workerGrid"></div>
             </section>
 
-            <!-- SECTION: Deduction Settings -->
+            <!-- Deductions Section -->
             <section id="section-deduction" class="content-section hidden">
                 <div class="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
                     <div class="p-6 bg-rose-50 border-b border-rose-100 flex items-center gap-3 text-rose-800">
-                        <i class="fas fa-shield-halved"></i>
-                        <h3 class="font-black text-lg">Master Deduction Config</h3>
+                        <i class="fas fa-minus-circle"></i>
+                        <h3 class="font-black">Master Deduction List</h3>
                     </div>
                     <div class="overflow-x-auto custom-scrollbar">
                         <table class="w-full text-left">
                             <thead class="bg-slate-50 text-[10px] font-black uppercase text-slate-400">
                                 <tr>
-                                    <th class="px-8 py-5 table-sticky-col min-w-[250px]">Name</th>
+                                    <th class="px-8 py-5 table-sticky-col">Worker</th>
                                     <th class="px-4 py-5 text-center">SSS</th>
                                     <th class="px-4 py-5 text-center">PhilH</th>
                                     <th class="px-4 py-5 text-center">PagIBIG</th>
-                                    <th class="px-4 py-5 text-center">Loan Balance</th>
+                                    <th class="px-4 py-5 text-center">Loan</th>
+                                    <th class="px-4 py-5 text-center">Vale</th>
                                     <th class="px-4 py-5 text-center">Voucher</th>
                                     <th class="px-4 py-5 text-center">Coop</th>
-                                    <th class="px-8 py-5 text-right bg-slate-100">Total Fixed</th>
+                                    <th class="px-8 py-5 text-right bg-slate-100">Fixed Total</th>
                                 </tr>
                             </thead>
                             <tbody id="deductionBody" class="divide-y divide-slate-100"></tbody>
@@ -268,39 +247,27 @@
             </section>
 
             <section id="section-history" class="content-section hidden">
-                <h3 class="text-2xl font-black mb-8">Payroll Archives</h3>
-                <div id="historyContainer" class="grid grid-cols-1 gap-4"></div>
+                <h3 class="text-xl font-black mb-6">Payroll Archives</h3>
+                <div id="historyContainer" class="grid grid-cols-1 gap-3"></div>
             </section>
 
         </main>
     </div>
 
-    <!-- Modals -->
-    <div id="modal-worker" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[100] flex items-center justify-center hidden p-4">
-        <div class="bg-white w-full max-w-lg rounded-[2.5rem] p-10 shadow-2xl animate-in zoom-in duration-300">
-            <h3 class="text-2xl font-black mb-8 text-center uppercase tracking-tight">Register New Worker</h3>
-            <form id="form-worker" class="space-y-5">
-                <div class="space-y-2">
-                    <label class="text-[10px] font-black text-slate-400 uppercase ml-2">Full Name</label>
-                    <input type="text" id="w-name" class="form-input-styled" required placeholder="Juan Dela Cruz">
-                </div>
+    <!-- Modal Add Worker -->
+    <div id="modal-worker" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center hidden p-4">
+        <div class="bg-white w-full max-w-md rounded-[2.5rem] p-10 shadow-2xl">
+            <h3 class="text-2xl font-black mb-8 text-center uppercase">Add New Worker</h3>
+            <form id="form-worker" class="space-y-4">
+                <input type="text" id="w-name" class="form-input-styled" required placeholder="Full Name">
+                <input type="text" id="w-pos" class="form-input-styled" required placeholder="Position (e.g. Electrician)">
                 <div class="grid grid-cols-2 gap-4">
-                    <div class="space-y-2">
-                        <label class="text-[10px] font-black text-slate-400 uppercase ml-2">Position</label>
-                        <input type="text" id="w-pos" class="form-input-styled" required placeholder="Electrician">
-                    </div>
-                    <div class="space-y-2">
-                        <label class="text-[10px] font-black text-slate-400 uppercase ml-2">Daily Rate</label>
-                        <input type="number" id="w-rate" class="form-input-styled" required placeholder="600">
-                    </div>
+                    <input type="number" id="w-rate" class="form-input-styled" required placeholder="Daily Rate">
+                    <input type="number" id="w-allow" class="form-input-styled" placeholder="Allowance">
                 </div>
-                <div class="space-y-2">
-                    <label class="text-[10px] font-black text-slate-400 uppercase ml-2">Allowance (Optional)</label>
-                    <input type="number" id="w-allow" class="form-input-styled" placeholder="50">
-                </div>
-                <div class="flex gap-4 pt-6">
-                    <button type="button" onclick="closeModal('worker')" class="flex-1 py-4 bg-slate-50 text-slate-500 rounded-2xl font-bold hover:bg-slate-100">Cancel</button>
-                    <button type="submit" class="flex-1 py-4 bg-yellow-400 text-slate-900 rounded-2xl font-black shadow-lg shadow-yellow-400/20">Save Profile</button>
+                <div class="flex gap-3 pt-4">
+                    <button type="button" onclick="closeModal('worker')" class="flex-1 py-4 bg-slate-100 text-slate-500 rounded-2xl font-bold">Cancel</button>
+                    <button type="submit" class="flex-1 py-4 bg-yellow-400 text-slate-900 rounded-2xl font-black">Save Worker</button>
                 </div>
             </form>
         </div>
@@ -311,7 +278,6 @@
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, deleteDoc, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // --- CORE CONFIG ---
         const firebaseConfig = {
             apiKey: "AIzaSyCHkN4FS6sGXIs8cleBwr5yIcjBn3Olt10",
             authDomain: "dlvsys.firebaseapp.com",
@@ -326,44 +292,39 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // --- STATE ---
         let state = {
             employees: [],
             attendance: {},
             deductions: {},
             history: [],
-            sites: ['Main Office'],
             currentCycle: null,
             activeSection: 'dashboard',
             selectedArchive: null,
             user: null
         };
 
-        // --- INITIALIZATION ---
         signInAnonymously(auth);
 
         onAuthStateChanged(auth, (u) => {
             state.user = u;
             if(u) {
                 initDate();
-                startDataSync();
+                startSync();
                 document.getElementById('loader').style.display = 'none';
             }
         });
 
         function initDate() {
             const now = new Date();
-            // Default cycle start: previous Thursday
             const start = new Date(now);
-            const diff = (now.getDay() - 4 + 7) % 7;
+            const diff = (now.getDay() - 4 + 7) % 7; // Reset to Thu
             start.setDate(now.getDate() - diff);
             start.setHours(0,0,0,0);
-            
             state.currentCycle = start;
-            document.getElementById('cycleDateInput').value = formatDateISO(start);
+            document.getElementById('cycleDateInput').value = start.toISOString().split('T')[0];
         }
 
-        function startDataSync() {
+        function startSync() {
             onSnapshot(collection(db, 'artifacts', APP_ID, 'public', 'data', 'employees'), s => {
                 state.employees = s.docs.map(d => ({ id: d.id, ...d.data() }));
                 refreshUI();
@@ -379,22 +340,17 @@
                 refreshUI();
             });
             onSnapshot(collection(db, 'artifacts', APP_ID, 'public', 'data', 'history'), s => {
-                state.history = s.docs.map(d => ({ id: d.id, ...d.data() }))
-                                 .sort((a,b) => new Date(b.lockedAt) - new Date(a.lockedAt));
+                state.history = s.docs.map(d => ({ id: d.id, ...d.data() })).sort((a,b) => b.id - a.id);
                 if(state.activeSection === 'history') renderHistory();
             });
         }
 
-        // --- NAVIGATION & ROUTING ---
         window.nav = (section) => {
             state.activeSection = section;
             document.querySelectorAll('.content-section').forEach(s => s.classList.add('hidden'));
             document.getElementById(`section-${section}`).classList.remove('hidden');
             document.getElementById('currentSectionTitle').innerText = section;
-            
-            // Clear archive view if switching away from payroll
             if(section !== 'payroll') state.selectedArchive = null;
-
             refreshUI();
         };
 
@@ -406,26 +362,25 @@
             if(state.activeSection === 'deduction') renderDeductions();
         }
 
-        // --- BUSINESS LOGIC: ATTENDANCE ---
-        function getCycleDays(start) {
+        function getDays() {
             const days = [];
-            const current = new Date(start);
+            const curr = new Date(state.currentCycle);
             for(let i=0; i<7; i++) {
-                days.push(new Date(current));
-                current.setDate(current.getDate() + 1);
+                days.push(new Date(curr));
+                curr.setDate(curr.getDate() + 1);
             }
             return days;
         }
 
         window.renderAttendance = () => {
-            const days = getCycleDays(state.currentCycle);
-            document.getElementById('attendanceRangeText').innerText = `${days[0].toLocaleDateString()} hanggang ${days[6].toLocaleDateString()}`;
+            const days = getDays();
+            document.getElementById('attendanceRangeText').innerText = `${days[0].toLocaleDateString()} to ${days[6].toLocaleDateString()}`;
             
             const head = document.getElementById('attendanceHeader');
             head.innerHTML = `<th class="px-8 py-5 table-sticky-col min-w-[200px] text-[10px] text-slate-400 uppercase font-black">Worker</th>`;
             days.forEach(d => {
                 head.innerHTML += `
-                    <th class="px-4 py-5 text-center border-l border-slate-50 min-w-[140px]">
+                    <th class="px-4 py-5 text-center border-l border-slate-50 min-w-[160px]">
                         <div class="text-[9px] font-black text-slate-400 uppercase">${d.toLocaleDateString('en-PH', {weekday:'short'})}</div>
                         <div class="text-sm font-black">${d.getDate()}</div>
                     </th>
@@ -434,176 +389,205 @@
 
             const body = document.getElementById('attendanceBody');
             body.innerHTML = state.employees.map(emp => {
-                const dayCells = days.map(d => {
-                    const dateKey = formatDateISO(d);
+                const cells = days.map(d => {
+                    const dateKey = d.toISOString().split('T')[0];
                     const record = state.attendance[`${emp.id}_${dateKey}`] || { status:null, ot:0, nd:0, holiday:'none' };
                     return `
                         <td class="px-4 py-6 text-center border-l border-slate-50">
-                            <div class="flex justify-center gap-1 mb-3">
+                            <div class="flex justify-center gap-2 mb-4">
                                 <button onclick="markAtt('${emp.id}','${dateKey}','p')" class="att-btn att-p ${record.status==='p'?'active':''}"><i class="fas fa-check"></i></button>
                                 <button onclick="markAtt('${emp.id}','${dateKey}','a')" class="att-btn att-a ${record.status==='a'?'active':''}"><i class="fas fa-times"></i></button>
                             </div>
-                            <div class="space-y-2">
-                                <div class="flex items-center justify-between gap-2">
-                                    <span class="text-[8px] font-black text-slate-400 uppercase">OT</span>
-                                    <input type="number" value="${record.ot}" onchange="updateRecord('${emp.id}','${dateKey}','ot',this.value)" class="w-10 text-center text-[10px] font-bold border rounded p-1">
+                            <div class="grid grid-cols-2 gap-2 mb-2">
+                                <div class="text-left">
+                                    <label class="text-[8px] font-black text-slate-400 uppercase">OT Hr</label>
+                                    <input type="number" step="0.5" value="${record.ot||0}" onchange="upRecord('${emp.id}','${dateKey}','ot',this.value)" class="w-full text-center text-[10px] font-bold border rounded p-1">
                                 </div>
-                                <select onchange="updateRecord('${emp.id}','${dateKey}','holiday',this.value)" class="w-full text-[9px] font-bold bg-slate-50 border rounded p-1 outline-none">
-                                    <option value="none" ${record.holiday==='none'?'selected':''}>Normal</option>
-                                    <option value="reg" ${record.holiday==='reg'?'selected':''}>Regular Holiday</option>
-                                    <option value="spe" ${record.holiday==='spe'?'selected':''}>Special Non-Work</option>
-                                </select>
+                                <div class="text-left">
+                                    <label class="text-[8px] font-black text-slate-400 uppercase">ND Hr</label>
+                                    <input type="number" step="0.5" value="${record.nd||0}" onchange="upRecord('${emp.id}','${dateKey}','nd',this.value)" class="w-full text-center text-[10px] font-bold border rounded p-1">
+                                </div>
                             </div>
+                            <select onchange="upRecord('${emp.id}','${dateKey}','holiday',this.value)" class="w-full text-[9px] font-bold bg-slate-50 border rounded p-1 outline-none">
+                                <option value="none" ${record.holiday==='none'?'selected':''}>Regular Day</option>
+                                <option value="reg" ${record.holiday==='reg'?'selected':''}>Reg. Holiday (200%)</option>
+                                <option value="spe" ${record.holiday==='spe'?'selected':''}>Special Day (130%)</option>
+                            </select>
                         </td>
                     `;
                 }).join('');
-                return `<tr><td class="px-8 py-6 table-sticky-col font-black text-slate-700 shadow-sm">${emp.name}</td>${dayCells}</tr>`;
+                return `<tr><td class="px-8 py-6 table-sticky-col font-black text-slate-700 shadow-sm">${emp.name}</td>${cells}</tr>`;
             }).join('');
         };
 
         window.markAtt = async (empId, date, status) => {
             const key = `${empId}_${date}`;
             const existing = state.attendance[key] || { status:null, ot:0, nd:0, holiday:'none' };
-            const newStatus = existing.status === status ? null : status;
-            await setDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'attendance', key), { ...existing, status: newStatus });
+            const next = existing.status === status ? null : status;
+            await setDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'attendance', key), { ...existing, status: next });
         };
 
-        window.updateRecord = async (empId, date, field, val) => {
+        window.upRecord = async (empId, date, field, val) => {
             const key = `${empId}_${date}`;
             const existing = state.attendance[key] || { status:null, ot:0, nd:0, holiday:'none' };
-            await setDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'attendance', key), { ...existing, [field]: field === 'ot' ? parseFloat(val) : val });
+            await setDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'attendance', key), { 
+                ...existing, 
+                [field]: (field === 'ot' || field === 'nd') ? parseFloat(val) : val 
+            });
         };
 
-        // --- BUSINESS LOGIC: PAYROLL ---
         window.renderPayroll = () => {
-            const activeData = state.selectedArchive || { 
-                cycle: state.currentCycle, 
-                att: state.attendance, 
-                ded: state.deductions 
-            };
-            
-            const days = getCycleDays(new Date(activeData.cycle));
-            const rangeStr = `${days[0].toLocaleDateString()} - ${days[6].toLocaleDateString()}`;
-            
-            document.getElementById('payrollSubTitle').innerText = state.selectedArchive ? `ARCHIVED RECORD: ${rangeStr}` : `CURRENT LIVE PERIOD: ${rangeStr}`;
-            document.getElementById('printHeaderPeriod').innerText = `PAYROLL PERIOD: ${rangeStr}`;
+            const activeData = state.selectedArchive || { cycle: state.currentCycle.toISOString(), att: state.attendance, ded: state.deductions };
+            const days = getDays();
+            const startStr = new Date(activeData.cycle).toLocaleDateString();
+            document.getElementById('payrollSubTitle').innerText = `Period: ${startStr} - ${new Date(new Date(activeData.cycle).getTime() + 6*86400000).toLocaleDateString()}`;
             document.getElementById('btn-save-payroll').style.display = state.selectedArchive ? 'none' : 'block';
 
             const body = document.getElementById('payrollTableBody');
             body.innerHTML = '';
-            
             let grandTotal = 0;
 
             state.employees.forEach(emp => {
-                let report = { days:0, basic:0, allowance:0, extra:0, gross:0 };
-                const empDed = activeData.ded[emp.id] || {};
+                let r = { days:0, basic:0, allow:0, ot:0, hol:0, nd:0, gross:0 };
+                const hr = (emp.rate || 0) / 8;
 
                 days.forEach(d => {
-                    const dateKey = formatDateISO(d);
-                    const att = activeData.att[`${emp.id}_${dateKey}`] || { status:null, ot:0, holiday:'none' };
-                    
-                    const hourly = (emp.rate || 0) / 8;
-                    const isSunday = d.getDay() === 0;
+                    const key = `${emp.id}_${d.toISOString().split('T')[0]}`;
+                    const att = activeData.att[key] || { status:null, ot:0, nd:0, holiday:'none' };
+                    const isSun = d.getDay() === 0;
 
                     if(att.status === 'p') {
-                        report.days++;
-                        report.basic += (emp.rate || 0);
-                        report.allowance += (emp.allowance || 0);
+                        r.days++;
+                        r.basic += emp.rate;
+                        r.allow += (emp.allowance || 0);
 
-                        // Computation Logic
+                        // OT & Holiday Pay Logic
+                        let mult = 1.25; // Default OT multiplier
                         if(att.holiday === 'reg') {
-                            report.extra += (emp.rate || 0); // 100% bonus
-                            report.extra += (att.ot * hourly * 1.25 * 2);
-                        } else if(att.holiday === 'spe' || isSunday) {
-                            report.extra += (emp.rate * 0.3); // 30% premium
-                            report.extra += (att.ot * hourly * 1.25 * 1.3);
+                            r.hol += emp.rate; // Extra 100% for working
+                            r.ot += (att.ot * hr * 1.25 * 2); 
+                            r.nd += (att.nd * hr * 0.1 * 2); // 10% ND on holiday base
+                        } else if(att.holiday === 'spe' || isSun) {
+                            r.hol += (emp.rate * 0.3); // Extra 30% for special/sunday
+                            r.ot += (att.ot * hr * 1.25 * 1.3);
+                            r.nd += (att.nd * hr * 0.1 * 1.3);
                         } else {
-                            report.extra += (att.ot * hourly * 1.25);
+                            r.ot += (att.ot * hr * 1.25);
+                            r.nd += (att.nd * hr * 0.1); // Basic 10% ND
                         }
                     } else if(att.holiday === 'reg') {
-                        // Unworked Regular Holiday = Basic Pay
-                        report.basic += (emp.rate || 0);
+                        r.basic += emp.rate; // Paid unworked regular holiday
                     }
                 });
 
-                report.gross = report.basic + report.allowance + report.extra;
-                const totalDed = Object.values(empDed).reduce((a,b) => a + (parseFloat(b) || 0), 0);
-                const net = report.gross - totalDed;
+                r.gross = r.basic + r.allow + r.ot + r.hol + r.nd;
+                const deds = activeData.ded[emp.id] || {};
+                const totalDed = Object.values(deds).reduce((a,b) => a + (parseFloat(b)||0), 0);
+                const net = r.gross - totalDed;
                 grandTotal += net;
 
                 body.innerHTML += `
-                    <tr class="hover:bg-slate-50 transition-colors">
-                        <td class="px-8 py-6 table-sticky-col">
-                            <div class="font-black text-slate-800 text-sm">${emp.name}</div>
-                            <div class="text-[9px] font-black text-slate-400 uppercase tracking-widest">${emp.position}</div>
+                    <tr>
+                        <td class="px-6 py-6 table-sticky-col">
+                            <div class="font-black text-slate-800">${emp.name}</div>
+                            <div class="text-[8px] font-bold text-slate-400 uppercase">${emp.position}</div>
                         </td>
-                        <td class="px-4 py-6 text-center font-black">${report.days}</td>
-                        <td class="px-4 py-6 text-right font-medium">₱${report.basic.toLocaleString()}</td>
-                        <td class="px-4 py-6 text-right font-medium">₱${report.allowance.toLocaleString()}</td>
-                        <td class="px-4 py-6 text-right font-medium text-blue-600">₱${report.extra.toLocaleString()}</td>
-                        <td class="px-6 py-6 text-right font-black bg-blue-50/50 text-blue-800 border-r border-blue-100">₱${report.gross.toLocaleString()}</td>
-                        <td class="px-3 py-6 text-center text-xs">₱${(empDed.sss||0).toLocaleString()}</td>
-                        <td class="px-3 py-6 text-center text-xs">₱${(empDed.philhealth||0).toLocaleString()}</td>
-                        <td class="px-3 py-6 text-center text-xs">₱${(empDed.pagibig||0).toLocaleString()}</td>
-                        <td class="px-3 py-6 text-center text-xs">₱${(empDed.loan||0).toLocaleString()}</td>
-                        <td class="px-3 py-6 text-center text-xs">₱${(empDed.vale||0).toLocaleString()}</td>
-                        <td class="px-3 py-6 text-center text-xs">₱${(empDed.voucher||0).toLocaleString()}</td>
-                        <td class="px-3 py-6 text-center text-xs">₱${(empDed.coop||0).toLocaleString()}</td>
-                        <td class="px-6 py-6 text-right font-black bg-rose-50/50 text-rose-800 border-l border-rose-100">₱${totalDed.toLocaleString()}</td>
-                        <td class="px-8 py-6 text-right font-black bg-emerald-500 text-white text-lg border-l border-emerald-600">₱${net.toLocaleString(undefined, {minimumFractionDigits:2})}</td>
+                        <td class="px-4 py-6 text-center font-black">${r.days}</td>
+                        <td class="px-4 py-6 text-right">₱${r.basic.toLocaleString()}</td>
+                        <td class="px-4 py-6 text-right text-slate-500">₱${r.allow.toLocaleString()}</td>
+                        <td class="px-4 py-6 text-right text-blue-600 font-bold">₱${r.ot.toLocaleString(undefined,{minimumFractionDigits:2})}</td>
+                        <td class="px-4 py-6 text-right text-blue-600 font-bold">₱${r.hol.toLocaleString(undefined,{minimumFractionDigits:2})}</td>
+                        <td class="px-4 py-6 text-right text-indigo-600 font-bold">₱${r.nd.toLocaleString(undefined,{minimumFractionDigits:2})}</td>
+                        <td class="px-6 py-6 text-right bg-blue-50 font-black text-blue-800 border-r">₱${r.gross.toLocaleString(undefined,{minimumFractionDigits:2})}</td>
+                        <td class="text-center text-[10px]">₱${(deds.sss||0)}</td>
+                        <td class="text-center text-[10px]">₱${(deds.philhealth||0)}</td>
+                        <td class="text-center text-[10px]">₱${(deds.pagibig||0)}</td>
+                        <td class="text-center text-[10px]">₱${(deds.loan||0)}</td>
+                        <td class="text-center text-[10px]">₱${(deds.vale||0)}</td>
+                        <td class="text-center text-[10px]">₱${(deds.voucher||0)}</td>
+                        <td class="text-center text-[10px]">₱${(deds.coop||0)}</td>
+                        <td class="px-6 py-6 text-right bg-rose-50 font-black text-rose-800">₱${totalDed.toLocaleString()}</td>
+                        <td class="px-8 py-6 text-right bg-emerald-600 text-white font-black text-lg italic">₱${net.toLocaleString(undefined,{minimumFractionDigits:2})}</td>
                     </tr>
                 `;
             });
-
             document.getElementById('stat-payroll').innerText = `₱ ${grandTotal.toLocaleString()}`;
         };
 
         window.finalizePayroll = async () => {
-            const periodStr = document.getElementById('payrollSubTitle').innerText;
-            if(!confirm(`I-lock at i-archive ang payroll para sa ${periodStr}? Hindi na ito mababago.`)) return;
-
-            const archiveId = Date.now().toString();
-            await setDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'history', archiveId), {
+            if(!confirm("I-archive ang payroll para sa linggong ito? Hindi na ito mababago.")) return;
+            const id = Date.now().toString();
+            await setDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'history', id), {
                 cycle: state.currentCycle.toISOString(),
                 att: state.attendance,
                 ded: state.deductions,
-                lockedAt: new Date().toLocaleString(),
-                totalWorkers: state.employees.length
+                total: document.getElementById('stat-payroll').innerText
             });
             nav('history');
         };
 
-        // --- UTILS ---
-        function formatDateISO(date) {
-            try {
-                if(!date || isNaN(date.getTime())) return new Date().toISOString().split('T')[0];
-                return date.toISOString().split('T')[0];
-            } catch(e) {
-                return new Date().toISOString().split('T')[0];
-            }
-        }
-
-        window.updateCycle = (val) => {
-            const newDate = new Date(val);
-            if(isNaN(newDate.getTime())) return;
-            state.currentCycle = newDate;
-            state.selectedArchive = null;
-            refreshUI();
+        window.renderHistory = () => {
+            const cont = document.getElementById('historyContainer');
+            cont.innerHTML = state.history.map(h => `
+                <div onclick="viewHistory('${h.id}')" class="bg-white p-5 rounded-2xl border flex justify-between items-center hover:border-yellow-400 cursor-pointer transition-all">
+                    <div>
+                        <h4 class="font-black text-slate-800">Period Starting: ${new Date(h.cycle).toLocaleDateString()}</h4>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase">Grand Total: ${h.total}</p>
+                    </div>
+                    <i class="fas fa-chevron-right text-slate-300"></i>
+                </div>
+            `).join('');
         };
 
-        window.shiftCycle = (days) => {
-            const d = new Date(state.currentCycle);
-            d.setDate(d.getDate() + days);
-            state.currentCycle = d;
-            document.getElementById('cycleDateInput').value = formatDateISO(d);
-            state.selectedArchive = null;
-            refreshUI();
+        window.viewHistory = (id) => {
+            const h = state.history.find(x => x.id === id);
+            state.selectedArchive = h;
+            nav('payroll');
         };
 
-        // --- WORKER MANAGEMENT ---
-        window.openModal = (id) => document.getElementById(`modal-${id}`).classList.remove('hidden');
-        window.closeModal = (id) => document.getElementById(`modal-${id}`).classList.add('hidden');
+        window.renderWorkers = () => {
+            document.getElementById('workerGrid').innerHTML = state.employees.map(e => `
+                <div class="bg-white p-6 rounded-3xl border shadow-sm group relative">
+                    <button onclick="delEmp('${e.id}')" class="absolute top-4 right-4 text-rose-200 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-all"><i class="fas fa-trash"></i></button>
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center font-black text-slate-400">${e.name[0]}</div>
+                        <div>
+                            <h4 class="font-black">${e.name}</h4>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">${e.position}</p>
+                        </div>
+                    </div>
+                    <div class="pt-4 border-t flex justify-between">
+                        <div><p class="text-[8px] font-black text-slate-300 uppercase">Rate</p><p class="font-black">₱${e.rate}</p></div>
+                        <div class="text-right"><p class="text-[8px] font-black text-slate-300 uppercase">Allow.</p><p class="font-black text-slate-500">₱${e.allowance||0}</p></div>
+                    </div>
+                </div>
+            `).join('');
+        };
 
+        window.renderDeductions = () => {
+            document.getElementById('deductionBody').innerHTML = state.employees.map(e => {
+                const d = state.deductions[e.id] || {};
+                const tot = Object.values(d).reduce((a,b)=>a+(parseFloat(b)||0), 0);
+                const fields = ['sss','philhealth','pagibig','loan','vale','voucher','coop'];
+                const inputs = fields.map(f => `
+                    <td class="px-1 py-4">
+                        <input type="number" value="${d[f]||0}" onchange="saveDed('${e.id}','${f}',this.value)" class="w-16 text-center text-[10px] font-bold border rounded p-1 outline-none focus:border-rose-400">
+                    </td>
+                `).join('');
+                return `<tr><td class="px-8 py-4 table-sticky-col font-black text-sm">${e.name}</td>${inputs}<td class="px-8 py-4 text-right bg-slate-50 font-black text-rose-600">₱${tot}</td></tr>`;
+            }).join('');
+        };
+
+        window.saveDed = async (empId, f, v) => {
+            const cur = state.deductions[empId] || {};
+            await setDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'deductions', empId), { ...cur, [f]: parseFloat(v)||0 });
+        };
+
+        window.delEmp = async (id) => { if(confirm("Burahin ang worker?")) await deleteDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'employees', id)); };
+        
+        window.openModal = (m) => document.getElementById(`modal-${m}`).classList.remove('hidden');
+        window.closeModal = (m) => document.getElementById(`modal-${m}`).classList.add('hidden');
+        
         document.getElementById('form-worker').onsubmit = async (e) => {
             e.preventDefault();
             const id = Date.now().toString();
@@ -616,106 +600,9 @@
             closeModal('worker'); e.target.reset();
         };
 
-        window.renderWorkers = () => {
-            const grid = document.getElementById('workerGrid');
-            grid.innerHTML = state.employees.map(emp => `
-                <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm relative group overflow-hidden">
-                    <div class="flex items-center gap-4 mb-4">
-                        <div class="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 font-bold">${emp.name[0]}</div>
-                        <div>
-                            <h4 class="font-black text-slate-800">${emp.name}</h4>
-                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">${emp.position}</p>
-                        </div>
-                    </div>
-                    <div class="flex justify-between items-end border-t border-slate-50 pt-4">
-                        <div>
-                            <p class="text-[9px] font-black text-slate-300 uppercase">Daily Rate</p>
-                            <p class="text-sm font-black text-slate-700">₱${emp.rate.toLocaleString()}</p>
-                        </div>
-                        <button onclick="delEmp('${emp.id}')" class="opacity-0 group-hover:opacity-100 p-2 text-rose-300 hover:text-rose-500 transition-all"><i class="fas fa-trash"></i></button>
-                    </div>
-                </div>
-            `).join('');
-        };
-
-        window.delEmp = async (id) => {
-            if(confirm("Burahin ang worker?")) {
-                await deleteDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'employees', id));
-                await deleteDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'deductions', id));
-            }
-        };
-
-        // --- DEDUCTION MANAGEMENT ---
-        window.renderDeductions = () => {
-            const body = document.getElementById('deductionBody');
-            body.innerHTML = state.employees.map(emp => {
-                const d = state.deductions[emp.id] || { sss:0, philhealth:0, pagibig:0, loan:0, voucher:0, coop:0 };
-                const total = Object.values(d).reduce((a,b) => a + (parseFloat(b) || 0), 0);
-                return `
-                    <tr class="hover:bg-slate-50/50">
-                        <td class="px-8 py-5 table-sticky-col font-black text-slate-700 text-sm">${emp.name}</td>
-                        <td class="px-2 py-5 text-center"><input type="number" value="${d.sss}" onchange="saveDed('${emp.id}','sss',this.value)" class="w-20 text-center text-xs font-bold border rounded-lg p-1.5 outline-none focus:ring-1 focus:ring-rose-400"></td>
-                        <td class="px-2 py-5 text-center"><input type="number" value="${d.philhealth}" onchange="saveDed('${emp.id}','philhealth',this.value)" class="w-20 text-center text-xs font-bold border rounded-lg p-1.5 outline-none focus:ring-1 focus:ring-rose-400"></td>
-                        <td class="px-2 py-5 text-center"><input type="number" value="${d.pagibig}" onchange="saveDed('${emp.id}','pagibig',this.value)" class="w-20 text-center text-xs font-bold border rounded-lg p-1.5 outline-none focus:ring-1 focus:ring-rose-400"></td>
-                        <td class="px-2 py-5 text-center"><input type="number" value="${d.loan}" onchange="saveDed('${emp.id}','loan',this.value)" class="w-20 text-center text-xs font-bold border rounded-lg p-1.5 outline-none focus:ring-1 focus:ring-rose-400"></td>
-                        <td class="px-2 py-5 text-center"><input type="number" value="${d.voucher}" onchange="saveDed('${emp.id}','voucher',this.value)" class="w-20 text-center text-xs font-bold border rounded-lg p-1.5 outline-none focus:ring-1 focus:ring-rose-400"></td>
-                        <td class="px-2 py-5 text-center"><input type="number" value="${d.coop}" onchange="saveDed('${emp.id}','coop',this.value)" class="w-20 text-center text-xs font-bold border rounded-lg p-1.5 outline-none focus:ring-1 focus:ring-rose-400"></td>
-                        <td class="px-8 py-5 text-right font-black bg-slate-50 text-rose-600">₱${total.toLocaleString(undefined, {minimumFractionDigits:2})}</td>
-                    </tr>
-                `;
-            }).join('');
-        };
-
-        window.saveDed = async (empId, field, val) => {
-            const existing = state.deductions[empId] || { sss:0, philhealth:0, pagibig:0, loan:0, voucher:0, coop:0 };
-            await setDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'deductions', empId), { ...existing, [field]: parseFloat(val) || 0 });
-        };
-
-        // --- HISTORY VIEW ---
-        window.renderHistory = () => {
-            const container = document.getElementById('historyContainer');
-            if(state.history.length === 0) {
-                container.innerHTML = `<div class="p-10 text-center text-slate-400 font-bold">Walang archive na nahanap.</div>`;
-                return;
-            }
-            container.innerHTML = state.history.map(h => `
-                <div class="bg-white p-6 rounded-3xl border border-slate-100 flex justify-between items-center group hover:border-yellow-400 transition-all cursor-pointer" onclick="viewArchive('${h.id}')">
-                    <div class="flex items-center gap-6">
-                        <div class="w-14 h-14 bg-slate-50 text-slate-400 rounded-2xl flex items-center justify-center text-xl group-hover:bg-yellow-50 group-hover:text-yellow-600 transition-all"><i class="fas fa-box-archive"></i></div>
-                        <div>
-                            <h4 class="font-black text-slate-800">Period: ${new Date(h.cycle).toLocaleDateString()} to ${new Date(new Date(h.cycle).getTime() + 6*24*60*60*1000).toLocaleDateString()}</h4>
-                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Locked on ${h.lockedAt} • ${h.totalWorkers} Workers</p>
-                        </div>
-                    </div>
-                    <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-all">
-                        <button class="px-6 py-2 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase">View Report</button>
-                        <button onclick="event.stopPropagation(); delArchive('${h.id}')" class="p-2 text-rose-300 hover:text-rose-500"><i class="fas fa-trash"></i></button>
-                    </div>
-                </div>
-            `).join('');
-        };
-
-        window.viewArchive = (id) => {
-            const item = state.history.find(x => x.id === id);
-            if(!item) return;
-            state.selectedArchive = item;
-            nav('payroll');
-        };
-
-        window.delArchive = async (id) => {
-            if(confirm("Permanenteng burahin ang archive?")) {
-                await deleteDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'history', id));
-            }
-        };
-
-        function updateStats() {
-            document.getElementById('stat-workers').innerText = state.employees.length;
-        }
-
-        // --- UI UTILS ---
-        document.getElementById('menuBtn').onclick = () => {
-            document.getElementById('sidebar').classList.toggle('-translate-x-full');
-        };
+        window.updateCycle = (v) => { state.currentCycle = new Date(v); refreshUI(); };
+        window.shiftCycle = (n) => { state.currentCycle.setDate(state.currentCycle.getDate() + n); document.getElementById('cycleDateInput').value = state.currentCycle.toISOString().split('T')[0]; refreshUI(); };
+        function updateStats() { document.getElementById('stat-workers').innerText = state.employees.length; }
 
     </script>
 </body>
