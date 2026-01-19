@@ -289,7 +289,17 @@
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, collection, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        const firebaseConfig = JSON.parse(__firebase_config);
+        // Updated Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCHkN4FS6sGXIs8cleBwr5yIcjBn3Olt10",
+            authDomain: "dlvsys.firebaseapp.com",
+            projectId: "dlvsys",
+            storageBucket: "dlvsys.firebasestorage.app",
+            messagingSenderId: "332557308953",
+            appId: "1:332557308953:web:ffa160a0e41734c7690688",
+            measurementId: "G-7K33YZ93J8"
+        };
+        
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
@@ -307,9 +317,14 @@
         const DED_FIELDS = ['sss', 'philhealth', 'pagibig', 'govt_loan', 'unpaid_loan', 'vale', 'ca_voucher', 'coop_share', 'coop_2026', 'wtax', 'others'];
 
         const initAuth = async () => {
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                await signInWithCustomToken(auth, __initial_auth_token);
-            } else {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (e) {
+                console.warn("Auth check failed (likely config mismatch), falling back to anonymous:", e);
                 await signInAnonymously(auth);
             }
         };
